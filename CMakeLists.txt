@@ -37,6 +37,11 @@ cuda_add_executable(RTLib
        src/FastDeviceMinMax.h
        src/ValidationKernels.h
        src/ValidationKernels.cu
+       src/OBJ_Loader.h
+       src/RayGenerator.h
+       src/RayGenerator.cpp
+       src/BVHManager.h
+       src/BVHManager.cpp
 )
 
 target_include_directories(RTLib PRIVATE ${TBB_INCLUDE_DIRS})

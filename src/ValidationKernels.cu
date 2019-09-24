@@ -185,3 +185,13 @@ Ray* GenerateAORaysUniform(
 
 	return cudaRays;
 }
+
+Ray* GenerateRaysFromFile(std::vector<Ray> &c_rays, int Count)
+{
+  Ray* cudaRays;
+
+  cudaCheck(cudaMalloc((void**)&cudaRays, sizeof(Ray) * Count));
+  cudaCheck(cudaMemcpy(cudaRays, &c_rays[0], sizeof(Ray) * Count, cudaMemcpyHostToDevice));
+
+  return cudaRays;
+}

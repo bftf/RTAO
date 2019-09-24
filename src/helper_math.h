@@ -1764,8 +1764,8 @@ __device__ __host__ inline void SHVectorRGB3::addIncomingRadiance(const float3& 
 	*this += SHVector3::basisFunction(worldSpaceDirection) * (incomingRadiance * weight);
 }
 
-__align__(16)
-struct GatheredLightSample
+// __align__(16)
+struct GatheredLightSample 
 {
 	SHVector2 SHVector;
 	float SHCorrection;
@@ -1846,7 +1846,7 @@ struct GatheredLightSample
 		AverageDistance = 0.0f;
 		NumBackfaceHits = 0;
 	}
-};
+} __attribute__((aligned(16))) ;
 
 struct Ray
 {

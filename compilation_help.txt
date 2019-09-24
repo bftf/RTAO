@@ -1,0 +1,1 @@
+cmake -D CUDA_TOOLKIT_ROOT_DIR=~/cuda_10_0 ..
