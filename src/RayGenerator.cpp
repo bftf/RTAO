@@ -82,9 +82,13 @@ float3 RayGenerator::CosineSampleHemisphere()
 
   // generate random sample
   float2 E;
-  srand(time(NULL));
-  E.x = ((double)rand() / (RAND_MAX));
-  E.y = ((double)rand() / (RAND_MAX));
+  
+  std::random_device rd;
+  std::mt19937 mt(rd());
+  std::uniform_real_distribution<float> dist(0.0, 1.0);
+
+  E.x = dist(mt);
+  E.y = dist(mt);
   
   // do the cosing hemisphere sampling!
   float Phi = 2 * PI * E.x;
@@ -174,12 +178,13 @@ void RayGenerator::generatePointInsideTriangle(
   const float3 a, const float3 b, const float3 c,
   const float3 n_a, const float3 n_b, const float3 n_c, 
   float3& out_point, float3& out_normal)
-  { 
-    // std::srand(std::time(nullptr)); // use current time as seed for random generator
-    srand(time(NULL));
-    float r1 = ((double) rand() / (RAND_MAX));
-    float r2 = ((double) rand() / (RAND_MAX));
+  {     
+    std::random_device rd;
+    std::mt19937 mt(rd());
+    std::uniform_real_distribution<float> dist(0.0, 1.0);
 
+    float r1 = dist(mt);
+    float r2 = dist(mt);
 
     out_point = (1 - sqrt(r1)) * a + (sqrt(r1) * (1 - r2)) * b + (sqrt(r1) * r2) * c;
     // assumption: the same linear combination can be used for the normal at out_point
@@ -209,8 +214,10 @@ void RayGenerator::generateObjectRays()
 
 void RayGenerator::debugging()
 {
-  for (auto ray : ray_helper_vec)
+  std::cout << ray_helper_vec.size() << std::endl;
+
+  for (auto cur_ray : ray_helper_vec)
   {
-    printf("%f %f %f\n", ray.origin_tmin.x, ray.origin_tmin.y, ray.origin_tmin.z);
+    printf("%f %f %f \n", cur_ray.origin_tmin.x, cur_ray.origin_tmin.y, cur_ray.origin_tmin.z);
   }
 }
