@@ -1,46 +1,26 @@
-#include <vector>
-#include <memory>
-
+// TODO: can we get rid of these?
 #include <cuda_runtime.h>
 #include <cuda_profiler_api.h>
-
-
 #include "CUDAAssert.h"
-
-
-
 #include <optix_prime/optix_primepp.h>
-
 
 #include "RayGenerator.h"
 #include "BVHManager.h"
 
 int main()
 {
- 
-  // init the Ray Generator
+
   RayGenerator rg;
   rg.loadModelOBJ();
   rg.generateObjectRays();
   rg.debugging();
 
+  /*
   BVHManager bvh_manager = BVHManager();
-
-
-  // generate cudaRays
-  {
-    // numRays = ray_helper_vec.size();
-    // cudaRays = GenerateRaysFromFile(ray_helper_vec, numRays);
-    
-  }
-
-  {
-    // BVH2  
-  }
-
-  {
-    // CWBVH
-  }
+  bvh_manager.buildBVH2(rg);
+  bvh_manager.buildCWBVH(rg);
+  */
+  
 
   /* TODO! REFACTOR THIS
 

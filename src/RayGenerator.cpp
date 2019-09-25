@@ -126,8 +126,11 @@ void RayGenerator::generateSPPRaysFromWorldPosAndDir(float4 world_pos, float4 wo
     ray_direction.x = tangent.x * b1.x + tangent.y * b2.x + tangent.z * b0.x;
     ray_direction.y = tangent.x * b1.y + tangent.y * b2.y + tangent.z * b0.y;
     ray_direction.z = tangent.x * b1.z + tangent.y * b2.z + tangent.z * b0.z;
-    ray_direction.w = t_max;
+    // normalize ray_direction
+    ray_direction = ray_direction / sqrt(ray_direction.x * ray_direction.x + ray_direction.y * ray_direction.y + ray_direction.z * ray_direction.z);
 
+    // encode for Ray struct
+    ray_direction.w = t_max;
     world_pos.w = t_min;
 
     Ray cur_ray;
@@ -218,6 +221,8 @@ void RayGenerator::debugging()
 
   for (auto cur_ray : ray_helper_vec)
   {
-    printf("%f %f %f \n", cur_ray.origin_tmin.x, cur_ray.origin_tmin.y, cur_ray.origin_tmin.z);
+    printf("%f %f %f %u %u %u\n", cur_ray.origin_tmin.x, cur_ray.origin_tmin.y, cur_ray.origin_tmin.z, 255, 0, 0);
+    float4 direction_point = cur_ray.origin_tmin + cur_ray.origin_tmin * cur_ray.dir_tmax; 
+    printf("%f %f %f %u %u %u\n", direction_point.x, direction_point.y, direction_point.z, 0, 255, 0);
   }
 }
