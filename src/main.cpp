@@ -22,6 +22,6 @@ int main()
   rt_manager.traceAila(rg);
   rt_manager.traceCWBVH(rg);
   // rt_manager.evaluate(rg);
-
+ 
   return 0;
 }
