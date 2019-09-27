@@ -19,7 +19,7 @@ int main()
 
   RayTraceManager rt_manager = RayTraceManager(rg);
   rt_manager.traceOptiXPrime(rg);
-  rt_manager.traceAila(rg);
+  rt_manager.traceAila(rg); 
   rt_manager.traceCWBVH(rg);
   // rt_manager.evaluate(rg);
  
