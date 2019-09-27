@@ -21,10 +21,10 @@ class RayGenerator
 
   private:
 
-  const float t_min = 0.1;
-  const float t_max = 100;
-  const uint spp = 1;
-  const uint samples_per_triangle = 4;
+  const float t_min = 1;
+  const float t_max = 3;
+  const uint spp = 16;
+  const uint samples_per_triangle = 16;
 
   std::vector<Ray> ray_helper_vec;
   Ray* cudaRays = nullptr;
@@ -44,4 +44,5 @@ class RayGenerator
     float3& out_point, float3& out_normal);
 
   friend class BVHManager;
+  friend class RayTraceManager;
 };

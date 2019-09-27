@@ -42,6 +42,8 @@ cuda_add_executable(RTLib
        src/RayGenerator.cpp
        src/BVHManager.h
        src/BVHManager.cpp
+       src/RayTraceManager.h
+       src/RayTraceManager.cpp
 )
 
 target_include_directories(RTLib PRIVATE ${TBB_INCLUDE_DIRS})

@@ -3,6 +3,7 @@
 #include <sstream>
 #include <string>
 #include <cmath>
+#include <math.h>
 #include <random>
 #include <ctime>
 #include <assert.h>
@@ -54,7 +55,8 @@ void RayGenerator::loadModelOBJ()
     cur_normal.x = loader.LoadedVertices[i].Normal.X;
     cur_normal.y = loader.LoadedVertices[i].Normal.Y;
     cur_normal.z = loader.LoadedVertices[i].Normal.Z;
-    NormalBuffer.push_back(cur_normal);
+    float length_cur_normal = sqrt(cur_normal.x*cur_normal.x + cur_normal.y*cur_normal.y + cur_normal.z*cur_normal.z);
+    NormalBuffer.push_back(-cur_normal/length_cur_normal); // HACK HACK HACK
   }
 }
 
@@ -77,9 +79,6 @@ void RayGenerator::GetTangentBasis(const float3 &n, float3 &b1, float3& b2)
 
 float3 RayGenerator::CosineSampleHemisphere()
 {
-  // define PI
-  const double PI = std::atan(1.0) * 4;
-
   // generate random sample
   float2 E;
   
@@ -91,42 +90,39 @@ float3 RayGenerator::CosineSampleHemisphere()
   E.y = dist(mt);
   
   // do the cosing hemisphere sampling!
-  float Phi = 2 * PI * E.x;
+  float Phi = 2 * M_PI * E.x;
   float CosTheta = sqrt(E.y);
   float SinTheta = sqrt(1 - CosTheta * CosTheta);
 
-  float3 H;
-  H.x = SinTheta * cos(Phi);
-  H.y = SinTheta * sin(Phi);
-  H.z = CosTheta;
-
+  float3 H = make_float3(SinTheta * cos(Phi), SinTheta * sin(Phi), CosTheta);
   return H;
 }
 
 void RayGenerator::generateSPPRaysFromWorldPosAndDir(float4 world_pos, float4 world_normal, std::vector<Ray>& out_rays)
 {
-  float3 b1, b2;
-  float3 b0;
-  b0.x = world_normal.x;
-  b0.y = world_normal.y;
-  b0.z = world_normal.z;
+  float3 n, b1, b2;
 
-  // get basis of the world normal
-  // b0, b1 and b2 form the basis
-  GetTangentBasis(b0, b1, b2);
+  const float world_normal_magnitude = sqrt(world_normal.x * world_normal.x + world_normal.y * world_normal.y + world_normal.z * world_normal.z);
+  n.x = world_normal.x / world_normal_magnitude;
+  n.y = world_normal.y / world_normal_magnitude;
+  n.z = world_normal.z / world_normal_magnitude;
+
+  // get orthonormal basis of the normal
+  GetTangentBasis(n, b1, b2);
   
   for(int i=0; i < spp; i++)
   {
     // sample the hemisphere, get a tangent
     float3 tangent = CosineSampleHemisphere();
 
-    // translate b0 into world_normal space
-    // b0 * float3x3(row0 = b1, row1 = b2, row2 = b0)
+    // translate tangent into world_normal space
+    // tangent * float3x3(row0 = b1, row1 = b2, row2 = n)
     float4 ray_direction;
-    ray_direction.x = tangent.x * b1.x + tangent.y * b2.x + tangent.z * b0.x;
-    ray_direction.y = tangent.x * b1.y + tangent.y * b2.y + tangent.z * b0.y;
-    ray_direction.z = tangent.x * b1.z + tangent.y * b2.z + tangent.z * b0.z;
-    // normalize ray_direction
+    ray_direction.x = tangent.x * b1.x + tangent.y * b2.x + tangent.z * n.x;
+    ray_direction.y = tangent.x * b1.y + tangent.y * b2.y + tangent.z * n.y;
+    ray_direction.z = tangent.x * b1.z + tangent.y * b2.z + tangent.z * n.z;
+
+    // normalize ray_direction - should not be required?
     ray_direction = ray_direction / sqrt(ray_direction.x * ray_direction.x + ray_direction.y * ray_direction.y + ray_direction.z * ray_direction.z);
 
     // encode for Ray struct
@@ -219,10 +215,25 @@ void RayGenerator::debugging()
 {
   std::cout << ray_helper_vec.size() << std::endl;
 
-  for (auto cur_ray : ray_helper_vec)
+  /*
+  for (int i = 0; i < ray_helper_vec.size(); i += spp)
   {
-    printf("%f %f %f %u %u %u\n", cur_ray.origin_tmin.x, cur_ray.origin_tmin.y, cur_ray.origin_tmin.z, 255, 0, 0);
-    float4 direction_point = cur_ray.origin_tmin + cur_ray.origin_tmin * cur_ray.dir_tmax; 
+    float3 direction_point = VertexBuffer[i] + 1 * NormalBuffer[i]; 
     printf("%f %f %f %u %u %u\n", direction_point.x, direction_point.y, direction_point.z, 0, 255, 0);
   }
+  */
+  
+  for (int i = 0; i < ray_helper_vec.size(); i += spp)
+  {
+    Ray cur_ray = ray_helper_vec[i];
+    // printf("%f %f %f %u %u %u\n", cur_ray.origin_tmin.x, cur_ray.origin_tmin.y, cur_ray.origin_tmin.z, 255, 0, 0);
+    
+    for (int j = 0; j < spp; j++)
+    {
+      Ray cur_ray = ray_helper_vec[i + j];
+      float4 direction_point = cur_ray.origin_tmin + 1 * cur_ray.dir_tmax; 
+      printf("%f %f %f %u %u %u\n", direction_point.x, direction_point.y, direction_point.z, 0, 255, 0);
+    }  
+  }
+
 }

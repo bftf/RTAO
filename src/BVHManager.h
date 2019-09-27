@@ -13,4 +13,5 @@ class BVHManager {
 
   private:
 
+    friend class RayTraceManager;
 };
