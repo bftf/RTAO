@@ -21,10 +21,10 @@ class RayGenerator
 
   private:
 
-  const float t_min = 1;
-  const float t_max = 3;
+  const float t_min = 0.1;
+  const float t_max = 10;
   const uint spp = 16;
-  const uint samples_per_triangle = 16;
+  const uint samples_per_triangle = 64;
 
   std::vector<Ray> ray_helper_vec;
   Ray* cudaRays = nullptr;
@@ -32,7 +32,6 @@ class RayGenerator
   std::vector<float3> VertexBuffer;
   std::vector<float3> NormalBuffer;
   std::vector<int3> IndexBuffer;
-
 
   // give rays the proper ray direction
   float3 CosineSampleHemisphere();
@@ -43,6 +42,11 @@ class RayGenerator
     const float3 n_a, const float3 n_b, const float3 n_c, 
     float3& out_point, float3& out_normal);
 
+  enum ray_sorting { no_sort, random_shuffle, direction, origin };
+  ray_sorting m_ray_sorting_strategy = direction;
+
+  void raySorting(std::vector<Ray>& v);
+  
   friend class BVHManager;
   friend class RayTraceManager;
 };

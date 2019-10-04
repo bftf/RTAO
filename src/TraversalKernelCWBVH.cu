@@ -5,6 +5,8 @@
 #include "Logger.h"
 #include "CUDAAssert.h"
 
+#define ENABLE_PROFILING 1 // set to 0 when using GPGPU-Sim, 1 when profiling cuda on actual HW
+
 __device__ unsigned __bfind(unsigned i) { unsigned b; asm volatile("bfind.u32 %0, %1; " : "=r"(b) : "r"(i)); return b; }
 
 __device__ __inline__ uint sign_extend_s8x4(uint i) { uint v; asm("prmt.b32 %0, %1, 0x0, 0x0000BA98;" : "=r"(v) : "r"(i)); return v; }
@@ -390,10 +392,12 @@ __host__ void rtTraceCWBVH(
 	int rayCount
 )
 {	
+#if ENABLE_PROFILING==1
 	float elapsedTime;
 	cudaEvent_t startEvent, stopEvent;
 	cudaCheck(cudaEventCreate(&startEvent));
 	cudaCheck(cudaEventCreate(&stopEvent));
+#endif
 
 	int* cudaFinishedRayCount;
 	cudaCheck(cudaMalloc(&cudaFinishedRayCount, sizeof(int)));
@@ -401,9 +405,11 @@ __host__ void rtTraceCWBVH(
 	dim3 blockDim(32, 2);
 	dim3 gridDim(32, 32);
 
+#if ENABLE_PROFILING==1
 	cudaProfilerStart();
 	cudaCheck(cudaEventRecord(startEvent, 0));
-
+#endif
+  
 	{
 		cudaMemset(cudaFinishedRayCount, 0, sizeof(int));
 		rtTraceCWBVHDynamicFetch <<< gridDim, blockDim >>> (
@@ -414,6 +420,7 @@ __host__ void rtTraceCWBVH(
 			);
 	}
 
+#if ENABLE_PROFILING==1
 	cudaCheck(cudaEventRecord(stopEvent, 0));
 	cudaCheck(cudaEventSynchronize(stopEvent));
 	cudaCheck(cudaEventElapsedTime(&elapsedTime, startEvent, stopEvent));
@@ -421,6 +428,7 @@ __host__ void rtTraceCWBVH(
 	Log("%.3fMS, %.2fMRays/s (rtTraceCWBVH Dynamic Fetch)", elapsedTime, (float)rayCount / 1000000.0f / (elapsedTime / 1000.0f));
 
 	cudaProfilerStop();
+#endif 
 
 	cudaFree(cudaFinishedRayCount);
 }

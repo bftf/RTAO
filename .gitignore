@@ -6,6 +6,7 @@
 bin
 build
 visualizer_data
+build_make
 
 CMakeCache.txt
 CMakeFiles

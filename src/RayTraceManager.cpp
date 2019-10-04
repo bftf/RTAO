@@ -8,6 +8,7 @@
 #include <cuda_runtime.h>
 #include <cuda_profiler_api.h>
 #include <optix_prime/optix_primepp.h>
+#include <optix.h>
 
 RayTraceManager::RayTraceManager(RayGenerator& rg)
 {
@@ -52,6 +53,12 @@ void RayTraceManager::traceAila(RayGenerator& rg)
 void RayTraceManager::traceCWBVH(RayGenerator& rg)
 {
   rtTraceCWBVH(rg.cudaRays, cudaHits, numRays); 
+}
+
+void RayTraceManager::traceOptiX(RayGenerator& rg)
+{
+  RTcontext context = 0;
+  // RT_CHECK_ERROR(rtContextCreate(&context)); 
 }
 
 void RayTraceManager::evaluate(RayGenerator& rg)

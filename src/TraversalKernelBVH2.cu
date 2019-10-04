@@ -7,6 +7,8 @@
 
 #include <cstdio>
 
+#define ENABLE_PROFILING 1 // set to 0 when using GPGPU-Sim, 1 when profiling cuda on actual HW
+
 __device__ float4* BVHTreeNodes;
 __device__ float4* TriangleWoopCoordinates;
 __device__ int* MappingFromTriangleAddressToIndex;
@@ -193,10 +195,13 @@ __host__ void rtTraceBVH2(
 	int rayCount
 )
 {
+
+#if ENABLE_PROFILING==1
 	float elapsedTime;
 	cudaEvent_t startEvent, stopEvent;
 	cudaCheck(cudaEventCreate(&startEvent));
 	cudaCheck(cudaEventCreate(&stopEvent));
+#endif
 
 	int* cudaFinishedRayCount;
 	cudaCheck(cudaMalloc(&cudaFinishedRayCount, sizeof(int)));
@@ -205,8 +210,12 @@ __host__ void rtTraceBVH2(
 	dim3 blockDim(128, 1);
 	dim3 gridDim(idivCeil(rayCount, blockDim.x), 1);
 
+#if ENABLE_PROFILING==1
 	cudaProfilerStart();
 	cudaCheck(cudaEventRecord(startEvent, 0));
+#endif
+
+   Log("start Aila tracing\n");
 
 	rtTraceBVH2Plain <<< gridDim, blockDim >>> (
 		rayBuffer,
@@ -215,6 +224,7 @@ __host__ void rtTraceBVH2(
 		cudaFinishedRayCount
 		);
 
+#if ENABLE_PROFILING==1
 	cudaCheck(cudaEventRecord(stopEvent, 0));
 	cudaCheck(cudaEventSynchronize(stopEvent));
 	cudaCheck(cudaEventElapsedTime(&elapsedTime, startEvent, stopEvent));
@@ -222,6 +232,7 @@ __host__ void rtTraceBVH2(
 	Log("%.3fMS, %.2lfMRays/s (rtTraceBVH2 No Dynamic Fetch)", elapsedTime, (double)rayCount / 1000000.0f / (elapsedTime / 1000.0f));
 
 	cudaProfilerStop();
+#endif
 
 	cudaFree(cudaFinishedRayCount);
 }

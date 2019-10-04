@@ -11,6 +11,8 @@ class RayTraceManager {
     void traceOptiXPrime(RayGenerator& rg);
     void traceAila(RayGenerator& rg);
     void traceCWBVH(RayGenerator& rg);
+    void traceOptiX(RayGenerator& rg);
+
     void evaluate(RayGenerator& rg);
 
   private:

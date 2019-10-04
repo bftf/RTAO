@@ -7,11 +7,39 @@
 #include <random>
 #include <ctime>
 #include <assert.h>
+#include <algorithm>
 
 #include "RayGenerator.h"
 #include "OBJ_Loader.h"
 #include "ValidationKernels.h"
 
+static bool compareByDirection(const Ray &a, const Ray &b)
+{
+  float4 a_d = a.dir_tmax;
+  float4 b_d = b.dir_tmax;
+
+  double a_d_d = a_d.x * 1/sqrt(3) + a_d.y * 1/sqrt(3) + a_d.z * 1/sqrt(3);
+  a_d_d = (a_d_d < -1.0 ? -1.0 : (a_d_d > 1.0 ? 1.0 : a_d_d));
+  
+  double b_d_d = b_d.x * 1/sqrt(3) + b_d.y * 1/sqrt(3) + b_d.z * 1/sqrt(3);
+  b_d_d = (b_d_d < -1.0 ? -1.0 : (b_d_d > 1.0 ? 1.0 : b_d_d));
+
+  double a_angle = acos(a_d_d);
+  double b_angle = acos(b_d_d);
+
+  return a_angle < b_angle;
+}
+
+static bool compareByOrigin(const Ray &a, const Ray &b)
+{
+  float4 a_o = a.origin_tmin;
+  float4 b_o = b.origin_tmin;
+
+  float a_o_d = sqrt(a_o.x * a_o.x + a_o.y * a_o.y + a_o.z * a_o.z);
+  float b_o_d = sqrt(b_o.x * b_o.x + b_o.y * b_o.y + b_o.z * b_o.z);
+
+  return a_o_d < b_o_d;
+}
 
 RayGenerator::RayGenerator()
 {
@@ -190,6 +218,32 @@ void RayGenerator::generatePointInsideTriangle(
     out_normal = (1 - sqrt(r1)) * n_a + (sqrt(r1) * (1 - r2)) * n_b + (sqrt(r1) * r2) * n_c;
   }
 
+void RayGenerator::raySorting(std::vector<Ray>& v)
+{
+  switch(m_ray_sorting_strategy)
+  {
+    case no_sort: { break; }
+    case random_shuffle: 
+    {
+      // sorting goes here!
+      std::random_device rd;
+      std::mt19937 g(rd());
+      std::shuffle(v.begin(), v.end(), g);
+      break;
+    }
+    case direction:
+    {
+      sort(v.begin(), v.end(), compareByDirection);
+      break;
+    }
+    case origin:
+    {
+      sort(v.begin(), v.end(), compareByOrigin);
+      break;
+    }
+  }
+}
+
 void RayGenerator::generateObjectRays()
 {
   for (auto cur_index : IndexBuffer)
@@ -207,6 +261,8 @@ void RayGenerator::generateObjectRays()
       ray_helper_vec.insert(std::end(ray_helper_vec), std::begin(temp), std::end(temp));
     }
   }
+
+  raySorting(ray_helper_vec);
 
   cudaRays = GenerateRaysFromFile(ray_helper_vec, ray_helper_vec.size());
 }
@@ -235,5 +291,4 @@ void RayGenerator::debugging()
       printf("%f %f %f %u %u %u\n", direction_point.x, direction_point.y, direction_point.z, 0, 255, 0);
     }  
   }
-
 }

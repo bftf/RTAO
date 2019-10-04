@@ -1,13 +1,11 @@
-// TODO: can we get rid of these?
-
-
 #include "RayGenerator.h"
 #include "BVHManager.h"
 #include "RayTraceManager.h"
 
+#include <iostream>
+
 int main()
 {
-
   RayGenerator rg = RayGenerator();
   rg.loadModelOBJ();
   rg.generateObjectRays();

@@ -19,8 +19,8 @@ EMBREE_LIB = /usr/local/lib/
 # CUDAPATH = ~/cuda/include
 NVCC = nvcc
 NVCCFLAGS = -c -g -std=c++11
-CUDAARCH = -gencode arch=compute_70,code=compute_70
-LFLAGS = -lcuda -lcudart
+CUDAARCH = -gencode arch=compute_75,code=compute_75
+LFLAGS = -lcuda --cudart shared
 
 
 all: build clean
@@ -29,7 +29,7 @@ build: gpu cpu
 	$(NVCC) $(LFLAGS) $(CUDAARCH) -o $(BUILD_DIR)/$(PROJECT_NAME) *.o -L $(OPTIX_LIB) -L $(EMBREE_LIB) -lembree3 -ltbb -loptix_prime -loptix
 
 gpu:
-	$(NVCC) $(NVCCFLAGS) $(CUDAARCH) $(SRC_DIR)*.cu
+	$(NVCC) --keep $(NVCCFLAGS) $(CUDAARCH) $(SRC_DIR)*.cu
 
 cpu:			
 	$(NVCC) $(NVCCFLAGS) $(CUDAARCH) $(SRC_DIR)*.cpp -I $(OPTIX_INCLUDE_DIR) -I $(EMBREE_INCLUDE_DIR)

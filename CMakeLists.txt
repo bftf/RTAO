@@ -7,7 +7,10 @@ enable_language(CUDA)
 
 SET(CMAKE_CXX_STANDARD 11)
 SET(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -std=c++11 -use_fast_math")
-LIST(APPEND CUDA_NVCC_FLAGS "-arch=sm_50; -std=c++11;")
+# LIST(APPEND CUDA_NVCC_FLAGS "-arch=sm_50; -std=c++11; --cudart shared")
+LIST(APPEND CUDA_NVCC_FLAGS "--gpu-architecture=compute_70 --gpu-code=compute_70 -std=c++11; -lcudart")
+
+
 
 SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/src/CMake ${CMAKE_MODULE_PATH})
 SET(TBB_ROOT_DIR "Path to TBB root dir" CACHE PATH "Intel TBB Library")
