@@ -16,12 +16,12 @@ class RayGenerator
   // generate ray_helper_vec and cudaRays - chose either one!
   void generateAORaysFromFile();
   void generateObjectRays();
-  void uploadRays();
+  void uploadRaysToGPU();
 
   int getRayCount() { return ray_helper_vec.size(); }
 
   // debugging
-  void debugging();
+  void printRaysForVisualization();
   void fillWithListOfRays();
 
   private:

@@ -61,7 +61,7 @@ void RayTraceManager::traceOptiX(RayGenerator& rg)
   // RT_CHECK_ERROR(rtContextCreate(&context)); 
 }
 
-void RayTraceManager::evaluate(RayGenerator& rg)
+void RayTraceManager::evaluateAndPrintForPLYVisualization(RayGenerator& rg)
 {
   std::vector<Hit> hostHits(numRays);
   cudaCheck(cudaMemcpy(hostHits.data(), cudaHits, sizeof(Hit) * numRays, cudaMemcpyDeviceToHost));

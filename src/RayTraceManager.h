@@ -13,7 +13,7 @@ class RayTraceManager {
     void traceCWBVH(RayGenerator& rg);
     void traceOptiX(RayGenerator& rg);
 
-    void evaluate(RayGenerator& rg);
+    void evaluateAndPrintForPLYVisualization(RayGenerator& rg);
     void debugging(RayGenerator& rg);
 
   private:

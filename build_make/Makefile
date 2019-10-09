@@ -21,7 +21,7 @@ NVCC = nvcc
 NVCCFLAGS = -c -g -std=c++11
 CUDAARCH = -gencode arch=compute_75,code=compute_75
 LFLAGS = -lcuda --cudart shared
-GPUDEBUGFLAG = -G # don't set this when running with GPGPU-Sim! Only use it when debugging the kernel in cuda gdb
+GPUDEBUGFLAG = -G # Only use it when debugging the kernel in cuda gdb, don't set this when running with GPGPU-Sim!
 
 all: build clean
 

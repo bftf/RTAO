@@ -9,9 +9,9 @@ int main()
   RayGenerator rg = RayGenerator();
   rg.loadModelOBJ();
   rg.generateObjectRays();
-  rg.uploadRays();
+  rg.uploadRaysToGPU();
   rg.fillWithListOfRays(); // fill custom list of rays for debugging
-  // rg.debugging(); // prints list of rays for visualization
+  // rg.printRaysForVisualization(); // prints list of rays for visualization
 
   BVHManager bvh_manager = BVHManager();
   // bvh_manager.buildBVH2(rg);
@@ -22,7 +22,7 @@ int main()
   // rt_manager.traceAila(rg); 
   rt_manager.traceCWBVH(rg);
 
-  // rt_manager.evaluate(rg); // prints outcome from kernels for visualization
+  // rt_manager.evaluateAndPrintForPLYVisualization(rg); // prints outcome from kernels for visualization
   // rt_manager.debugging(rg); // for debugging - prints output of kernels into command line
   
   printf("Done, traced %i rays \n", rg.getRayCount());
