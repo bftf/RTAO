@@ -14,6 +14,7 @@ class RayTraceManager {
     void traceOptiX(RayGenerator& rg);
 
     void evaluate(RayGenerator& rg);
+    void debugging(RayGenerator& rg);
 
   private:
 

@@ -1,11 +1,13 @@
 #include <cuda_profiler_api.h>
+#include <stdio.h>
+
 #include "helper_math.h"
 #include "FastDeviceMinMax.h"
 
 #include "Logger.h"
 #include "CUDAAssert.h"
 
-#define ENABLE_PROFILING 1 // set to 0 when using GPGPU-Sim, 1 when profiling cuda on actual HW
+#define ENABLE_PROFILING 0 // set to 0 when using GPGPU-Sim, 1 when profiling cuda on actual HW
 
 __device__ unsigned __bfind(unsigned i) { unsigned b; asm volatile("bfind.u32 %0, %1; " : "=r"(b) : "r"(i)); return b; }
 
@@ -46,7 +48,7 @@ __global__ void rtTraceCWBVHDynamicFetch(
 	uint octinv;
 	uint2 nodeGroup = make_uint2(0);
 	uint2 triangleGroup = make_uint2(0);
-	char stackPtr = 0;
+	int stackPtr = 0; // char
 	int hitAddr = -1;
 	float2 triangleuv;
 
@@ -64,14 +66,19 @@ __global__ void rtTraceCWBVHDynamicFetch(
 		const int			numTerminated = __popc(maskTerminated);
 		const int			idxTerminated = __popc(maskTerminated & ((1u << threadIdx.x) - 1));
 
-		if (terminated)
+    if (terminated)
 		{
+
 			if (idxTerminated == 0)
+      {
 				rayBase = atomicAdd(finishedRayCount, numTerminated);
+      }
 
 			rayidx = rayBase + idxTerminated;
 			if (rayidx >= rayCount)
+      {
 				break;
+      }
 
 			orig = make_float3(rayBuffer[rayidx].origin_tmin);
 			dir = make_float3(rayBuffer[rayidx].dir_tmax);
@@ -105,8 +112,8 @@ __global__ void rtTraceCWBVHDynamicFetch(
 
 				if (nodeGroup.y > 0x00FFFFFF)
 				{
-					STACK_PUSH(nodeGroup);
-				}
+          STACK_PUSH(nodeGroup);
+        }
 
 				{
 					const unsigned int slot_index = (child_bit_index - 24) ^ octinv;
@@ -302,7 +309,7 @@ __global__ void rtTraceCWBVHDynamicFetch(
 
 			while (triangleGroup.y != 0)
 			{
-			#if TRIANGLE_POSTPONING
+      #if TRIANGLE_POSTPONING
 				const float Rt = 0.2;
 				const int threshold = totalThreads * Rt;
 				const int numActiveThreads = __popc(__activemask());
@@ -312,7 +319,7 @@ __global__ void rtTraceCWBVHDynamicFetch(
 					break;
 				}
 			#endif
-					
+	
 				int triangleIndex = __bfind(triangleGroup.y);
 
 				int triAddr = triangleGroup.x * 3 + triangleIndex * 3;
@@ -355,8 +362,8 @@ __global__ void rtTraceCWBVHDynamicFetch(
 			{
 				if (stackPtr > 0)
 				{
-					STACK_POP(nodeGroup);
-				}
+          STACK_POP(nodeGroup);
+        }
 				else
 				{
 					rayResultBuffer[rayidx].t_triId_u_v = make_float4(tmax, int_as_float(hitAddr), triangleuv.x, triangleuv.y);
@@ -402,7 +409,7 @@ __host__ void rtTraceCWBVH(
 	int* cudaFinishedRayCount;
 	cudaCheck(cudaMalloc(&cudaFinishedRayCount, sizeof(int)));
 
-	dim3 blockDim(32, 2);
+	dim3 blockDim(32, 1); // (32, 2)
 	dim3 gridDim(32, 32);
 
 #if ENABLE_PROFILING==1

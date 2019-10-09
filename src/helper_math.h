@@ -1852,6 +1852,12 @@ struct Ray
 {
 	float4 origin_tmin;
 	float4 dir_tmax;
+
+  void make_ray(float o_x, float o_y, float o_z, float d_x, float d_y, float d_z, float t_min, float t_max)
+  {
+    origin_tmin = make_float4(o_x, o_y, o_z, t_min);
+    dir_tmax = make_float4(d_x, d_y, d_z, t_max);
+  }
 };
 
 struct Hit

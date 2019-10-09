@@ -97,5 +97,23 @@ void RayTraceManager::evaluate(RayGenerator& rg)
   // Print out the first 10 results to validate by eye
   // for (int rayIndex = 0; rayIndex < 10; rayIndex++)
   // printf("%.2f %d\t", hostHits[rayIndex].t_triId_u_v.x, *(int*)&hostHits[rayIndex].t_triId_u_v.y);
+}
 
+void RayTraceManager::debugging(RayGenerator& rg)
+{
+  std::vector<Hit> hostHits(numRays);
+  cudaCheck(cudaMemcpy(hostHits.data(), cudaHits, sizeof(Hit) * numRays, cudaMemcpyDeviceToHost));
+  assert(numRays % rg.spp == 0);
+
+  printf("numrays traced: %i \n", (int)numRays); 
+
+  for( int i = 0; i < numRays; i++)
+  {
+    printf("%.2f %d\t", hostHits[i].t_triId_u_v.x, *(int*)&hostHits[i].t_triId_u_v.y);
+
+    printf("%f %f %f %f %f %f \n", 
+    rg.ray_helper_vec[i * rg.spp].origin_tmin.x, rg.ray_helper_vec[i * rg.spp].origin_tmin.y, rg.ray_helper_vec[i * rg.spp].origin_tmin.z,
+    rg.ray_helper_vec[i * rg.spp].dir_tmax.x, rg.ray_helper_vec[i * rg.spp].dir_tmax.y, rg.ray_helper_vec[i * rg.spp].dir_tmax.z );
+  }
+  
 }
