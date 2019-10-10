@@ -52,11 +52,11 @@ RayGenerator::~RayGenerator()
   return;
 }
 
-void RayGenerator::loadModelOBJ()
+void RayGenerator::loadModelOBJ(const std::string& model_path)
 {
 
   objl::Loader loader;
-  assert(loader.LoadFile("/home/francois/Documents/RayTracing/models/teapot/teapot.obj"));
+  assert(loader.LoadFile(model_path));
 
   // loader.LoadFile("C:/Users/f.demoullin/Documents/graphics_assets/teapot.obj");
   // loader.LoadFile("C:/Users/f.demoullin/Documents/graphics_assets/conferenceRoomModel/conference.obj");

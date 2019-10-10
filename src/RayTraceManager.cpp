@@ -9,6 +9,8 @@
 #include <cuda_profiler_api.h>
 #include <optix_prime/optix_primepp.h>
 #include <optix.h>
+#include <iostream>
+#include <fstream>
 
 RayTraceManager::RayTraceManager(RayGenerator& rg)
 {
@@ -57,16 +59,32 @@ void RayTraceManager::traceCWBVH(RayGenerator& rg)
 
 void RayTraceManager::traceOptiX(RayGenerator& rg)
 {
+  /*TODO!!*/
   RTcontext context = 0;
   // RT_CHECK_ERROR(rtContextCreate(&context)); 
 }
 
-void RayTraceManager::evaluateAndPrintForPLYVisualization(RayGenerator& rg)
+void RayTraceManager::evaluateAndPrintForPLYVisualization(RayGenerator& rg, const std::string& out_ply_path)
 {
   std::vector<Hit> hostHits(numRays);
   cudaCheck(cudaMemcpy(hostHits.data(), cudaHits, sizeof(Hit) * numRays, cudaMemcpyDeviceToHost));
   assert(numRays % rg.spp == 0);
 
+  std::ofstream outfile(out_ply_path);
+
+  // header
+  outfile << "ply" << std::endl;
+  outfile << "format ascii 1.0" << std::endl;
+  outfile << "element vertex " << numRays/rg.spp << std::endl;
+  outfile << "property float x" << std::endl;
+  outfile << "property float y" << std::endl;
+  outfile << "property float z" << std::endl;
+  outfile << "property uchar red" << std::endl;
+  outfile << "property uchar green" << std::endl;
+  outfile << "property uchar blue" << std::endl;
+  outfile << "end_header" << std::endl;
+
+  // data (greyscale)
   for (int i = 0; i < numRays/rg.spp; i++)
   {
     float sum = 0.f;
@@ -77,21 +95,22 @@ void RayTraceManager::evaluateAndPrintForPLYVisualization(RayGenerator& rg)
       {
         assert(cur_t >= rg.t_min);
         assert(cur_t <= rg.t_max);
-
         sum += 1;  
-        
       }
     }
 
     if (sum > 0) 
     {
       uint color = (uint)((255.f / (float)rg.spp) * sum);
-      printf("%f %f %f %u %u %u\n", 
-        rg.ray_helper_vec[i * rg.spp].origin_tmin.x, rg.ray_helper_vec[i * rg.spp].origin_tmin.y, rg.ray_helper_vec[i * rg.spp].origin_tmin.z, 
-        color, color, color);
+      outfile 
+        << rg.ray_helper_vec[i * rg.spp].origin_tmin.x << " "
+        << rg.ray_helper_vec[i * rg.spp].origin_tmin.y << " "
+        << rg.ray_helper_vec[i * rg.spp].origin_tmin.z << " "
+        << color << " " << color << " " << color 
+        << std::endl;
     }
-    
   }
+  outfile.close();
   printf("done!");
 
   // Print out the first 10 results to validate by eye

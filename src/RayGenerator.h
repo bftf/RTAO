@@ -1,5 +1,6 @@
 #include "helper_math.h"
 #include <vector>
+#include <string>
 
 class BVHManager;
 
@@ -11,7 +12,7 @@ class RayGenerator
   ~RayGenerator();
 
   // populates VertexBuffer and IndexBuffer
-  void loadModelOBJ();
+  void loadModelOBJ(const std::string& model_path);
 
   // generate ray_helper_vec and cudaRays - chose either one!
   void generateAORaysFromFile();
@@ -28,8 +29,8 @@ class RayGenerator
 
   const float t_min = 0.1;
   const float t_max = 10;
-  const uint spp = 1;
-  const uint samples_per_triangle = 1;
+  const uint spp = 4;
+  const uint samples_per_triangle = 16;
 
   std::vector<Ray> ray_helper_vec;
   Ray* cudaRays = nullptr;

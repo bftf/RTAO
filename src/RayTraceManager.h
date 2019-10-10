@@ -1,4 +1,5 @@
 #include "helper_math.h"
+#include <string>
 
 class RayGenerator;
 class BVHManager;
@@ -6,14 +7,14 @@ class BVHManager;
 class RayTraceManager {
   public:
     RayTraceManager(RayGenerator& rg);
-    RayTraceManager() {};
+    ~RayTraceManager() {};
 
     void traceOptiXPrime(RayGenerator& rg);
     void traceAila(RayGenerator& rg);
     void traceCWBVH(RayGenerator& rg);
     void traceOptiX(RayGenerator& rg);
 
-    void evaluateAndPrintForPLYVisualization(RayGenerator& rg);
+    void evaluateAndPrintForPLYVisualization(RayGenerator& rg, const std::string& out_ply_path);
     void debugging(RayGenerator& rg);
 
   private:
