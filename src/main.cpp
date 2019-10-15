@@ -7,15 +7,23 @@
 
 int main()
 {
-  const std::string model_path = "/home/francois/Documents/RayTracing/models/teapot/teapot.obj";
-  const std::string out_ply_path = "/home/francois/Documents/RayTracing/CWBVH/build_make/ply_files/teapot.ply";
+  // const std::string model_path = "/home/francois/Documents/RayTracing/models/teapot/teapot.obj";
+  // const std::string out_ply_path = "/home/francois/Documents/RayTracing/CWBVH/build_make/ply_files/teapot.ply";
+
+  const std::string model_path = "/home/francois/Documents/RayTracing/models/Sponza/models/sponza.obj";
+  const std::string out_ply_path = "/home/francois/Documents/RayTracing/CWBVH/build_make/ply_files/sponza.ply";
 
   RayGenerator rg = RayGenerator();
   rg.loadModelOBJ(model_path);
-  rg.generateObjectRays();
-  rg.uploadRaysToGPU();
-  // rg.fillWithListOfRays(); // fill custom list of rays for debugging
+  printf("Done loading obj\n");
+  
+  // rg.generateObjectRays();
+  // rg.downsizeRayVector(50);
+  // printf("Done generating rays\n");
+  
+  rg.fillWithListOfRays(); // fill custom list of rays for debugging
   // rg.printRaysForVisualization(); // prints list of rays for visualization
+  rg.uploadRaysToGPU();
 
   BVHManager bvh_manager = BVHManager();
   RayTraceManager rt_manager = RayTraceManager(rg);
@@ -29,11 +37,12 @@ int main()
   
   /* CWBVH */
   bvh_manager.buildCWBVH(rg);
+  printf("Start tracing %i rays \n", rg.getRayCount());
   rt_manager.traceCWBVH(rg);
 
-  
-  rt_manager.evaluateAndPrintForPLYVisualization(rg, out_ply_path); // prints outcome from kernels for visualization
-  // rt_manager.debugging(rg); // for debugging - prints output of kernels into command line
+
+  // rt_manager.evaluateAndPrintForPLYVisualization(rg, out_ply_path); // prints outcome from kernels for visualization
+  rt_manager.debugging(rg); // for debugging - prints output of kernels into command line
   
   printf("Done, traced %i rays \n", rg.getRayCount());
   return 0;

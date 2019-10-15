@@ -216,7 +216,7 @@ __global__ void rtTraceCWBVHDynamicFetch(
 								const unsigned int child_bits = extract_byte(child_bits4, childIndex);
 								const unsigned int bit_index = extract_byte(bit_index4, childIndex);
 								hitmask |= child_bits << bit_index;
-							}
+              }
 						}
 					}
 
@@ -277,6 +277,7 @@ __global__ void rtTraceCWBVHDynamicFetch(
 
 						for (int childIndex = 0; childIndex < 4; childIndex++)
 						{
+
 							// Use VMIN, VMAX to compute the slabs
 							const float cmin = fmaxf(fmax_fmax(tminx[childIndex], tminy[childIndex], tminz[childIndex]), tmin);
 							const float cmax = fminf(fmin_fmin(tmaxx[childIndex], tmaxy[childIndex], tmaxz[childIndex]), tmax);
@@ -291,7 +292,7 @@ __global__ void rtTraceCWBVHDynamicFetch(
 								hitmask |= child_bits << bit_index;
 							}
 						}
-					}
+					} 
 
 					nodeGroup.y = (hitmask & 0xFF000000) | (*((byte*)&n0.w + 3));
 					triangleGroup.y = hitmask & 0x00FFFFFF;
@@ -319,8 +320,8 @@ __global__ void rtTraceCWBVHDynamicFetch(
 					break;
 				}
 			#endif
-	
-				int triangleIndex = __bfind(triangleGroup.y);
+
+        int triangleIndex = __bfind(triangleGroup.y);
 
 				int triAddr = triangleGroup.x * 3 + triangleIndex * 3;
 
@@ -409,7 +410,7 @@ __host__ void rtTraceCWBVH(
 	int* cudaFinishedRayCount;
 	cudaCheck(cudaMalloc(&cudaFinishedRayCount, sizeof(int)));
 
-	dim3 blockDim(32, 1); // (32, 2)
+	dim3 blockDim(32, 2); // (32, 2)
 	dim3 gridDim(32, 32);
 
 #if ENABLE_PROFILING==1

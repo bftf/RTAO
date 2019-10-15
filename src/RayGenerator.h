@@ -17,7 +17,9 @@ class RayGenerator
   // generate ray_helper_vec and cudaRays - chose either one!
   void generateAORaysFromFile();
   void generateObjectRays();
+  void RandomizeAndDownsizeRays();
   void uploadRaysToGPU();
+  void downsizeRayVector(const uint64_t number_of_rays);
 
   int getRayCount() { return ray_helper_vec.size(); }
 
@@ -25,12 +27,16 @@ class RayGenerator
   void printRaysForVisualization();
   void fillWithListOfRays();
 
+  // Hack! Invert the normal for the Tepot model because of the OBJ file
+  // const int invertNormal = -1; // teapot
+  const int invertNormal = 1; // sponza
+
   private:
 
   const float t_min = 0.1;
   const float t_max = 10;
-  const uint spp = 4;
-  const uint samples_per_triangle = 16;
+  const uint spp = 1;
+  const uint samples_per_triangle = 1;
 
   std::vector<Ray> ray_helper_vec;
   Ray* cudaRays = nullptr;
@@ -49,7 +55,7 @@ class RayGenerator
     float3& out_point, float3& out_normal);
 
   enum ray_sorting { no_sort, random_shuffle, direction, origin };
-  ray_sorting m_ray_sorting_strategy = no_sort;
+  ray_sorting m_ray_sorting_strategy = random_shuffle;
 
   void raySorting(std::vector<Ray>& v);
   
