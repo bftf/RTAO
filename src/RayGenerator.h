@@ -29,14 +29,14 @@ class RayGenerator
 
   // Hack! Invert the normal for the Tepot model because of the OBJ file
   // const int invertNormal = -1; // teapot
-  const int invertNormal = 1; // sponza
+  const int invertNormal = 1; // sponza + dragon
 
   private:
 
   const float t_min = 0.1;
   const float t_max = 10;
   const uint spp = 1;
-  const uint samples_per_triangle = 1;
+  const uint samples_per_triangle = 4;
 
   std::vector<Ray> ray_helper_vec;
   Ray* cudaRays = nullptr;

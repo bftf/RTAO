@@ -23,7 +23,7 @@ CUDAARCH = -gencode arch=compute_75,code=compute_75
 LFLAGS = -lcuda --cudart shared
 GPUDEBUGFLAG = -G # Only use it when debugging the kernel in cuda gdb, don't set this when running with GPGPU-Sim!
 
-all: build clean
+all: build
 
 build: gpu cpu
 	$(NVCC) $(LFLAGS) $(CUDAARCH) -o $(BUILD_DIR)/$(PROJECT_NAME) *.o -L $(OPTIX_LIB) -L $(EMBREE_LIB) -lembree3 -ltbb -loptix_prime -loptix
@@ -35,4 +35,5 @@ cpu:
 	$(NVCC) $(NVCCFLAGS) $(CUDAARCH) $(SRC_DIR)*.cpp -I $(OPTIX_INCLUDE_DIR) -I $(EMBREE_INCLUDE_DIR)
 
 clean:
-	rm *.o
+	find . -type f -name _cuobjdump_list_ptx_\* -exec rm {} \;
+	find . -type f -name _app_cuda_version_\* -exec rm {} \;

@@ -1,4 +1,5 @@
 #include <vector>
+#include <math.h>
 
 #include "BVHManager.h"
 #include "helper_math.h"
@@ -126,4 +127,12 @@ void BVHManager::buildBVH2(RayGenerator& rg)
       cudaInlinedPrimitives,
       cudaPrimitiveIndices
     );
+
+    unsigned long bvhdata_size = BVHData.BVHNodeData.size() * sizeof(float4);
+    printf("cudaBVHNodeData size: %f kB, %f MB, %f GB\n", (float)bvhdata_size/(1024.f), (float)bvhdata_size/(1024.f * 1024.f), (float)bvhdata_size/(1024.f * 1024.f * 1024.f));
+    unsigned long inlined_primitives_size = BVHData.InlinedPrimitives.size() * sizeof(float4);
+    printf("inlined_primitives_size size: %f kB, %f MB, %f GB\n", (float)inlined_primitives_size/(1024.f), (float)inlined_primitives_size/(1024.f * 1024.f), (float)inlined_primitives_size/(1024.f * 1024.f * 1024.f));
+    unsigned long primitive_indices_size = BVHData.PrimitiveIndices.size() * sizeof(int);
+    printf("primitive_indices_size: %f kB, %f MB, %f GB\n", (float)primitive_indices_size/(1024.f), (float)primitive_indices_size/(1024.f * 1024.f), (float)primitive_indices_size/(1024.f * 1024.f * 1024.f));
+
   }

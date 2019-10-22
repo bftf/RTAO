@@ -10,16 +10,19 @@ int main()
   // const std::string model_path = "/home/francois/Documents/RayTracing/models/teapot/teapot.obj";
   // const std::string out_ply_path = "/home/francois/Documents/RayTracing/CWBVH/build_make/ply_files/teapot.ply";
 
-  const std::string model_path = "/home/francois/Documents/RayTracing/models/Sponza/models/sponza.obj";
-  const std::string out_ply_path = "/home/francois/Documents/RayTracing/CWBVH/build_make/ply_files/sponza.ply";
+  // const std::string model_path = "/home/francois/Documents/RayTracing/models/Sponza/models/sponza.obj";
+  // const std::string out_ply_path = "/home/francois/Documents/RayTracing/CWBVH/build_make/ply_files/sponza.ply";
+
+  const std::string model_path = "/home/francois/Documents/RayTracing/models/Dragon/dragon.obj";
+  const std::string out_ply_path = "/home/francois/Documents/RayTracing/CWBVH/build_make/ply_files/dragon.ply";
 
   RayGenerator rg = RayGenerator();
   rg.loadModelOBJ(model_path);
   printf("Done loading obj\n");
   
-  // rg.generateObjectRays();
-  // rg.downsizeRayVector(50);
-  // printf("Done generating rays\n");
+  rg.generateObjectRays();
+  rg.downsizeRayVector(32);
+  printf("Done generating rays\n");
   
   rg.fillWithListOfRays(); // fill custom list of rays for debugging
   // rg.printRaysForVisualization(); // prints list of rays for visualization

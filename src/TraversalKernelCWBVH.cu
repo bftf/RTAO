@@ -7,7 +7,7 @@
 #include "Logger.h"
 #include "CUDAAssert.h"
 
-#define ENABLE_PROFILING 0 // set to 0 when using GPGPU-Sim, 1 when profiling cuda on actual HW
+#define ENABLE_PROFILING 1 // set to 0 when using GPGPU-Sim, 1 when profiling cuda on actual HW
 
 __device__ unsigned __bfind(unsigned i) { unsigned b; asm volatile("bfind.u32 %0, %1; " : "=r"(b) : "r"(i)); return b; }
 
@@ -61,20 +61,20 @@ __global__ void rtTraceCWBVHDynamicFetch(
 	{
 		int& rayBase = nextRayArray[threadIdx.y];
 
-		bool				terminated = stackPtr == 0 && nodeGroup.y <= 0x00FFFFFF;
+		bool				terminated = stackPtr == 0 && nodeGroup.y <= 0x00FFFFFF && triangleGroup.y == 0;
 		const unsigned int	maskTerminated = __ballot_sync(__activemask(), terminated);
 		const int			numTerminated = __popc(maskTerminated);
 		const int			idxTerminated = __popc(maskTerminated & ((1u << threadIdx.x) - 1));
 
     if (terminated)
 		{
-
 			if (idxTerminated == 0)
       {
 				rayBase = atomicAdd(finishedRayCount, numTerminated);
       }
 
 			rayidx = rayBase + idxTerminated;
+
 			if (rayidx >= rayCount)
       {
 				break;
@@ -92,7 +92,7 @@ __global__ void rtTraceCWBVHDynamicFetch(
 			nodeGroup = make_uint2(0, 0b10000000000000000000000000000000);
 			triangleGroup = make_uint2(0);
 			stackPtr = 0;
-			hitAddr = -1;
+			hitAddr = -1;    
 		}
 		
 	#if DYNAMIC_FETCH
@@ -377,7 +377,9 @@ __global__ void rtTraceCWBVHDynamicFetch(
 			const int Nw = 16;
 			lostLoopIterations += __popc(__activemask()) - Nd;
 			if (lostLoopIterations >= Nw)
-				break;
+      {
+        break;
+      }
 		#endif
 		} while (true);
 

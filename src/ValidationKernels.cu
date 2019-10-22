@@ -1,5 +1,8 @@
 #include <vector>
 #include <curand_kernel.h>
+#include <stdio.h>
+#include <cmath>
+
 #include "helper_math.h"
 #include "CUDAAssert.h"
 
@@ -192,6 +195,9 @@ Ray* GenerateRaysFromFile(std::vector<Ray> &c_rays, int Count)
 
   cudaCheck(cudaMalloc((void**)&cudaRays, sizeof(Ray) * Count));
   cudaCheck(cudaMemcpy(cudaRays, &c_rays[0], sizeof(Ray) * Count, cudaMemcpyHostToDevice));
+
+  unsigned long cuda_rays_size = sizeof(Ray) * Count;
+  printf("cuda_rays_size: %f kB, %f MB, %f GB \n", (float)cuda_rays_size/(1024.f), (float)cuda_rays_size/(1024.f * 1024.f), (float)cuda_rays_size/(1024.f * 1024.f * 1024.f));
 
   return cudaRays;
 }

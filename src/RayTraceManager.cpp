@@ -16,6 +16,8 @@ RayTraceManager::RayTraceManager(RayGenerator& rg)
 {
   numRays = rg.ray_helper_vec.size();
   cudaCheck(cudaMalloc(&cudaHits, sizeof(Hit) * numRays));
+  unsigned long cuda_hits_size = sizeof(Hit) * numRays;
+  printf("cuda_hits_size: %f kB, %f MB, %f GB \n", (float)cuda_hits_size/(1024.f), (float)cuda_hits_size/(1024.f * 1024.f), (float)cuda_hits_size/(1024.f * 1024.f * 1024.f));
 };
 
 void RayTraceManager::traceOptiXPrime(RayGenerator& rg)
@@ -125,14 +127,25 @@ void RayTraceManager::debugging(RayGenerator& rg)
   assert(numRays % rg.spp == 0);
 
   printf("numrays traced: %i \n", (int)numRays); 
+  
+  uint16_t wrong_ray_output_count = 0;
+
 
   for( int i = 0; i < numRays; i++)
   {
-    printf("%.2f %d\t", hostHits[i].t_triId_u_v.x, *(int*)&hostHits[i].t_triId_u_v.y);
+    //if (hostHits[i].t_triId_u_v.x == 0.0f && *(int*)&hostHits[i].t_triId_u_v.y == 0)
+    {
+      wrong_ray_output_count++;
 
-    printf("%f %f %f %f %f %f \n", 
-    rg.ray_helper_vec[i * rg.spp].origin_tmin.x, rg.ray_helper_vec[i * rg.spp].origin_tmin.y, rg.ray_helper_vec[i * rg.spp].origin_tmin.z,
-    rg.ray_helper_vec[i * rg.spp].dir_tmax.x, rg.ray_helper_vec[i * rg.spp].dir_tmax.y, rg.ray_helper_vec[i * rg.spp].dir_tmax.z );
+      printf("%d %.2f %d\t", i, hostHits[i].t_triId_u_v.x, *(int*)&hostHits[i].t_triId_u_v.y);
+      printf("%f %f %f %f %f %f \n", 
+      rg.ray_helper_vec[i * rg.spp].origin_tmin.x, rg.ray_helper_vec[i * rg.spp].origin_tmin.y, rg.ray_helper_vec[i * rg.spp].origin_tmin.z,
+      rg.ray_helper_vec[i * rg.spp].dir_tmax.x, rg.ray_helper_vec[i * rg.spp].dir_tmax.y, rg.ray_helper_vec[i * rg.spp].dir_tmax.z );
+    }
+    
+    /*
+    */
   }
   
+  printf("wrong_ray_output_count: %d\n", wrong_ray_output_count);
 }
