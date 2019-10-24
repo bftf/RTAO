@@ -7,7 +7,7 @@
 #include "Logger.h"
 #include "CUDAAssert.h"
 
-#define ENABLE_PROFILING 1 // set to 0 when using GPGPU-Sim, 1 when profiling cuda on actual HW
+#define ENABLE_PROFILING 0 // set to 0 when using GPGPU-Sim, 1 when profiling cuda on actual HW
 
 __device__ unsigned __bfind(unsigned i) { unsigned b; asm volatile("bfind.u32 %0, %1; " : "=r"(b) : "r"(i)); return b; }
 

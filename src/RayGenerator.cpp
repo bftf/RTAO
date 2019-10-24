@@ -299,6 +299,8 @@ void RayGenerator::downsizeRayVector(const uint64_t number_of_rays)
 void RayGenerator::uploadRaysToGPU()
 {
   cudaRays = GenerateRaysFromFile(ray_helper_vec, ray_helper_vec.size());
+  unsigned long cuda_rays_size = sizeof(Ray) * ray_helper_vec.size();
+  print_helper::print_buffer("cudaRays", cuda_rays_size, (void*)cudaRays);
 }
 
 void RayGenerator::fillWithListOfRays()

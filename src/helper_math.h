@@ -26,6 +26,8 @@
 #define HELPER_MATH_H
 
 #include <cuda_runtime.h>
+#include <string>
+#include <iostream>
 
 typedef unsigned int uint;
 typedef unsigned short ushort;
@@ -36,6 +38,24 @@ typedef unsigned short ushort;
 
 #ifndef __CUDACC__
 #include <math.h>
+
+////////////////////////////////////////////////////////////////////////////////
+// print_helper - global namespace
+////////////////////////////////////////////////////////////////////////////////  
+
+namespace print_helper
+{
+    inline void print_buffer(const std::string& name, const unsigned long byte_count, const void* const ptr)
+    {
+      std::cout << name << " at address: " << ptr << std::endl;
+      std::cout << name << " size: " <<
+      "0x" << std::hex << byte_count << " bytes " << 
+      byte_count/1024.f  << " kB " <<
+      byte_count/(1024.f*1024.f)  << " MB " <<
+      byte_count/(1024.f*1024.f*1024.f)  << " GB " << 
+      std::endl;  
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // host implementations of CUDA functions

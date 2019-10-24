@@ -128,11 +128,12 @@ void BVHManager::buildBVH2(RayGenerator& rg)
       cudaPrimitiveIndices
     );
 
-    unsigned long bvhdata_size = BVHData.BVHNodeData.size() * sizeof(float4);
-    printf("cudaBVHNodeData size: %f kB, %f MB, %f GB\n", (float)bvhdata_size/(1024.f), (float)bvhdata_size/(1024.f * 1024.f), (float)bvhdata_size/(1024.f * 1024.f * 1024.f));
-    unsigned long inlined_primitives_size = BVHData.InlinedPrimitives.size() * sizeof(float4);
-    printf("inlined_primitives_size size: %f kB, %f MB, %f GB\n", (float)inlined_primitives_size/(1024.f), (float)inlined_primitives_size/(1024.f * 1024.f), (float)inlined_primitives_size/(1024.f * 1024.f * 1024.f));
-    unsigned long primitive_indices_size = BVHData.PrimitiveIndices.size() * sizeof(int);
-    printf("primitive_indices_size: %f kB, %f MB, %f GB\n", (float)primitive_indices_size/(1024.f), (float)primitive_indices_size/(1024.f * 1024.f), (float)primitive_indices_size/(1024.f * 1024.f * 1024.f));
+    
 
+    unsigned long bvhdata_size = BVHData.BVHNodeData.size() * sizeof(float4);
+    print_helper::print_buffer("cudaBVHNodeData", bvhdata_size, (void*)cudaBVHNodeData);
+    unsigned long inlined_primitives_size = BVHData.InlinedPrimitives.size() * sizeof(float4);
+    print_helper::print_buffer("cudaInlinedPrimitives", inlined_primitives_size, (void*)cudaInlinedPrimitives);
+    unsigned long primitive_indices_size = BVHData.PrimitiveIndices.size() * sizeof(int);
+    print_helper::print_buffer("cudaPrimitiveIndices", primitive_indices_size, (void*)cudaPrimitiveIndices);
   }

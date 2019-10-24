@@ -17,7 +17,7 @@ RayTraceManager::RayTraceManager(RayGenerator& rg)
   numRays = rg.ray_helper_vec.size();
   cudaCheck(cudaMalloc(&cudaHits, sizeof(Hit) * numRays));
   unsigned long cuda_hits_size = sizeof(Hit) * numRays;
-  printf("cuda_hits_size: %f kB, %f MB, %f GB \n", (float)cuda_hits_size/(1024.f), (float)cuda_hits_size/(1024.f * 1024.f), (float)cuda_hits_size/(1024.f * 1024.f * 1024.f));
+  print_helper::print_buffer("cudaHits", cuda_hits_size, (void*)cudaHits);
 };
 
 void RayTraceManager::traceOptiXPrime(RayGenerator& rg)

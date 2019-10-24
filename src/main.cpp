@@ -21,10 +21,10 @@ int main()
   printf("Done loading obj\n");
   
   rg.generateObjectRays();
-  rg.downsizeRayVector(32);
+  rg.downsizeRayVector(5000);
   printf("Done generating rays\n");
   
-  rg.fillWithListOfRays(); // fill custom list of rays for debugging
+  // rg.fillWithListOfRays(); // fill custom list of rays for debugging
   // rg.printRaysForVisualization(); // prints list of rays for visualization
   rg.uploadRaysToGPU();
 
@@ -45,7 +45,7 @@ int main()
 
 
   // rt_manager.evaluateAndPrintForPLYVisualization(rg, out_ply_path); // prints outcome from kernels for visualization
-  rt_manager.debugging(rg); // for debugging - prints output of kernels into command line
+  // rt_manager.debugging(rg); // for debugging - prints output of kernels into command line
   
   printf("Done, traced %i rays \n", rg.getRayCount());
   return 0;
