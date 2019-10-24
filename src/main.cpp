@@ -32,7 +32,7 @@ int main()
   RayTraceManager rt_manager = RayTraceManager(rg);
 
   /* OptiX */
-  // rt_manager.traceOptiXPrime(rg);
+  rt_manager.traceOptiXPrime(rg);
 
   /* Aila */
   // bvh_manager.buildBVH2(rg);

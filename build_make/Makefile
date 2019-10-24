@@ -7,6 +7,7 @@ BUILD_DIR = ./
 SRC_DIR = ../src/
 
 # OptiX
+USING_OPTIX = 0
 OPTIX_INCLUDE_DIR = ~/Documents/RayTracing/NVIDIA-OptiX-SDK-5.1.0-linux64/include
 OPTIX_LIB = /home/francois/Documents/RayTracing/NVIDIA-OptiX-SDK-5.1.0-linux64/lib64/ # make sure this is in LD_LIBRARY_PATH
 
@@ -20,19 +21,26 @@ EMBREE_LIB = /usr/local/lib/
 NVCC = nvcc
 NVCCFLAGS = -c -g -std=c++11
 CUDAARCH = -gencode arch=compute_75,code=compute_75
-LFLAGS = -lcuda --cudart shared
+ifeq ($(USING_OPTIX), 0)
+LFLAGS = -lcuda --cudart shared -lembree3 -ltbb -loptix_prime -loptix
+DFLAGS = -DOPTIX_PRIME
+else
+LFLAGS = -lcuda --cudart shared -lembree3 -ltbb
+DFLAGS = 
+endif
 GPUDEBUGFLAG = -G # Only use it when debugging the kernel in cuda gdb, don't set this when running with GPGPU-Sim!
+
 
 all: build
 
 build: gpu cpu
-	$(NVCC) $(LFLAGS) $(CUDAARCH) -o $(BUILD_DIR)/$(PROJECT_NAME) *.o -L $(OPTIX_LIB) -L $(EMBREE_LIB) -lembree3 -ltbb -loptix_prime -loptix
+	$(NVCC) $(CUDAARCH) -o $(BUILD_DIR)/$(PROJECT_NAME) *.o -L $(OPTIX_LIB) -L $(EMBREE_LIB) $(LFLAGS)
 
 gpu:
-	$(NVCC) --keep $(NVCCFLAGS) $(CUDAARCH) $(SRC_DIR)*.cu
+	$(NVCC) --keep $(NVCCFLAGS) $(CUDAARCH) $(SRC_DIR)*.cu $(DFLAGS)
 
 cpu:			
-	$(NVCC) $(NVCCFLAGS) $(CUDAARCH) $(SRC_DIR)*.cpp -I $(OPTIX_INCLUDE_DIR) -I $(EMBREE_INCLUDE_DIR)
+	$(NVCC) $(NVCCFLAGS) $(CUDAARCH) $(SRC_DIR)*.cpp -I $(OPTIX_INCLUDE_DIR) -I $(EMBREE_INCLUDE_DIR) $(DFLAGS)
 
 clean:
 	find . -type f -name _cuobjdump_list_ptx_\* -exec rm {} \;

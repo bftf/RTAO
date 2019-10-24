@@ -7,10 +7,13 @@
 
 #include <cuda_runtime.h>
 #include <cuda_profiler_api.h>
-#include <optix_prime/optix_primepp.h>
-#include <optix.h>
 #include <iostream>
 #include <fstream>
+
+#ifdef OPTIX_PRIME
+#include <optix_prime/optix_primepp.h>
+#include <optix.h>
+#endif
 
 RayTraceManager::RayTraceManager(RayGenerator& rg)
 {
@@ -20,6 +23,7 @@ RayTraceManager::RayTraceManager(RayGenerator& rg)
   print_helper::print_buffer("cudaHits", cuda_hits_size, (void*)cudaHits);
 };
 
+#ifdef OPTIX_PRIME
 void RayTraceManager::traceOptiXPrime(RayGenerator& rg)
 {
   optix::prime::Context OptiXContext = optix::prime::Context::create(RTP_CONTEXT_TYPE_CUDA);
@@ -48,6 +52,7 @@ void RayTraceManager::traceOptiXPrime(RayGenerator& rg)
   }
   cudaProfilerStop();
 }
+#endif
 
 void RayTraceManager::traceAila(RayGenerator& rg)
 {
@@ -62,7 +67,7 @@ void RayTraceManager::traceCWBVH(RayGenerator& rg)
 void RayTraceManager::traceOptiX(RayGenerator& rg)
 {
   /*TODO!!*/
-  RTcontext context = 0;
+  // RTcontext context = 0;
   // RT_CHECK_ERROR(rtContextCreate(&context)); 
 }
 
