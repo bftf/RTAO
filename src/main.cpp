@@ -12,14 +12,14 @@ int main()
   const std::string model_base_path = "/home/francois/Documents/RayTracing/models/";
   const std::string ray_base_path = "/home/francois/Documents/RayTracing/CWBVH/build_make/ray_files/"; 
 
-  const std::string model_name = "teapot";
-  const std::string obj_path_addition = "/teapot/teapot.obj";
+  // const std::string model_name = "teapot";
+  // const std::string obj_path_addition = "/teapot/teapot.obj";
 
-  const std::string model_name = "sponza";
-  const std::string obj_path_addition = "sponza.obj";
+  // const std::string model_name = "sponza";
+  // const std::string obj_path_addition = "sponza.obj";
 
-  const std::string model_name = "dragon";
-  const std::string obj_path_addition = "Dragon/dragon.obj";
+  // const std::string model_name = "dragon";
+  // const std::string obj_path_addition = "Dragon/dragon.obj";
 
   const std::string model_name = "san-miguel";
   const std::string obj_path_addition = "San_Miguel/san-miguel.obj";
@@ -27,7 +27,7 @@ int main()
   const std::string out_ply_path = ply_base_path + model_name + ".ply";
   const std::string model_path = model_base_path + obj_path_addition;
 
-  RayGenerator rg = RayGenerator(1, 1, 0.1, 10); /*spp, spt, t_min, t_max*/
+  RayGenerator rg = RayGenerator(4, 4, 0.1, 10); /*spp, spt, t_min, t_max*/
   rg.loadModelOBJ(model_path);
   printf("Done loading obj\n");
   
