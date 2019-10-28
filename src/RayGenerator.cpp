@@ -280,6 +280,13 @@ void RayGenerator::generateObjectRays(uint number_of_rays)
   }
 }
 
+void RayGenerator::uploadRaysToGPU()
+{
+  cudaRays = GenerateRaysFromFile(ray_helper_vec, ray_helper_vec.size());
+  unsigned long cuda_rays_size = sizeof(Ray) * ray_helper_vec.size();
+  print_helper::print_buffer("cudaRays", cuda_rays_size, (void*)cudaRays);
+}
+
 void RayGenerator::saveRaysToFile(const std::string& file_path, const std::string& model_name)
 {
   std::ofstream myfile;
@@ -339,24 +346,6 @@ void RayGenerator::readRaysFromFile(const std::string& file_path, const uint num
     ray_helper_vec[i].make_ray(lineData[0], lineData[1], lineData[2], lineData[3], lineData[4], lineData[5], lineData[6], lineData[7]); 
     i++;
   }
-
-
-  for( int i = 0; i < ray_helper_vec.size(); i++)
-  {
-    printf("ray_helper_vec[i].make_ray(%f, %f, %f, %f, %f, %f, %f, %f); i++;\n",
-      ray_helper_vec[i].origin_tmin.x, ray_helper_vec[i].origin_tmin.y, ray_helper_vec[i].origin_tmin.z,
-      ray_helper_vec[i].dir_tmax.x, ray_helper_vec[i].dir_tmax.y, ray_helper_vec[i].dir_tmax.z,
-      ray_helper_vec[i].origin_tmin.w, ray_helper_vec[i].dir_tmax.w
-    );
-  }
-
-}
-
-void RayGenerator::uploadRaysToGPU()
-{
-  cudaRays = GenerateRaysFromFile(ray_helper_vec, ray_helper_vec.size());
-  unsigned long cuda_rays_size = sizeof(Ray) * ray_helper_vec.size();
-  print_helper::print_buffer("cudaRays", cuda_rays_size, (void*)cudaRays);
 }
 
 void RayGenerator::fillWithListOfRays()
@@ -412,5 +401,4 @@ void RayGenerator::fillWithListOfRays()
     );
   }
   */
-  
 }
