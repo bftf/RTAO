@@ -8,7 +8,7 @@ class RayGenerator
 {
   public:
   
-  RayGenerator();
+  RayGenerator(uint p_spp=1, uint p_spt=1, float p_t_min=0.1, float p_t_max=10);
   ~RayGenerator();
 
   // populates VertexBuffer and IndexBuffer
@@ -16,15 +16,17 @@ class RayGenerator
 
   // generate ray_helper_vec and cudaRays - chose either one!
   void generateAORaysFromFile();
-  void generateObjectRays();
+  void generateObjectRays(uint number_of_rays=-1);
   void RandomizeAndDownsizeRays();
   void uploadRaysToGPU();
-  void downsizeRayVector(const uint64_t number_of_rays);
-
+  
   int getRayCount() { return ray_helper_vec.size(); }
 
+  // ray file IO - this is used to make rays deterministic
+  void saveRaysToFile(const std::string& file_path, const std::string& model_name);
+  void readRaysFromFile(const std::string& file_path, const uint number_of_rays);
+
   // debugging
-  void printRaysForVisualization();
   void fillWithListOfRays();
 
   // Hack! Invert the normal for the Tepot model because of the OBJ file
@@ -33,10 +35,10 @@ class RayGenerator
 
   private:
 
-  const float t_min = 0.1;
-  const float t_max = 10;
-  const uint spp = 1;
-  const uint samples_per_triangle = 4;
+  float t_min;
+  float t_max;
+  uint spp;
+  uint samples_per_triangle;
 
   std::vector<Ray> ray_helper_vec;
   Ray* cudaRays = nullptr;

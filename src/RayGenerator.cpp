@@ -41,9 +41,15 @@ static bool compareByOrigin(const Ray &a, const Ray &b)
   return a_o_d < b_o_d;
 }
 
-RayGenerator::RayGenerator()
+RayGenerator::RayGenerator(uint p_spp, uint p_spt, float p_t_min, float p_t_max)
 {
   srand(time(0));
+  
+  spp = p_spp;
+  samples_per_triangle = p_spt;
+  t_min = p_t_min;
+  t_max = p_t_max;
+
   return;
 }
 
@@ -244,11 +250,11 @@ void RayGenerator::raySorting(std::vector<Ray>& v)
   }
 }
 
-void RayGenerator::generateObjectRays()
+void RayGenerator::generateObjectRays(uint number_of_rays)
 {
-  for (auto cur_index : IndexBuffer)
+  for (int cur_samples_per_triangle = 0; cur_samples_per_triangle < samples_per_triangle; cur_samples_per_triangle++)
   {
-    for (int cur_samples_per_triangle = 0; cur_samples_per_triangle < samples_per_triangle; cur_samples_per_triangle++)
+    for (auto cur_index : IndexBuffer)
     {
       float3 cur_point, cur_normal;
       generatePointInsideTriangle(
@@ -260,40 +266,90 @@ void RayGenerator::generateObjectRays()
       generateSPPRaysFromWorldPosAndDir(make_float4(cur_point), make_float4(cur_normal), temp);
       ray_helper_vec.insert(std::end(ray_helper_vec), std::begin(temp), std::end(temp));
     }
+
+    if (number_of_rays > 0 && ray_helper_vec.size() > number_of_rays) break;
   }
+
+
   raySorting(ray_helper_vec);
-}
 
-void RayGenerator::printRaysForVisualization()
-{
-  std::cout << ray_helper_vec.size() << std::endl;
-
-  /*
-  for (int i = 0; i < ray_helper_vec.size(); i += spp)
+  if (number_of_rays > 0)
   {
-    float3 direction_point = VertexBuffer[i] + 1 * NormalBuffer[i]; 
-    printf("%f %f %f %u %u %u\n", direction_point.x, direction_point.y, direction_point.z, 0, 255, 0);
-  }
-  */
-  
-  for (int i = 0; i < ray_helper_vec.size(); i += spp)
-  {
-    Ray cur_ray = ray_helper_vec[i];
-    // printf("%f %f %f %u %u %u\n", cur_ray.origin_tmin.x, cur_ray.origin_tmin.y, cur_ray.origin_tmin.z, 255, 0, 0);
-    
-    for (int j = 0; j < spp; j++)
-    {
-      Ray cur_ray = ray_helper_vec[i + j];
-      float4 direction_point = cur_ray.origin_tmin + 1 * cur_ray.dir_tmax; 
-      printf("%f %f %f %u %u %u\n", direction_point.x, direction_point.y, direction_point.z, 0, 255, 0);
-    }  
+    assert(m_ray_sorting_strategy == random_shuffle);
+    ray_helper_vec.resize(number_of_rays);
   }
 }
 
-void RayGenerator::downsizeRayVector(const uint64_t number_of_rays)
+void RayGenerator::saveRaysToFile(const std::string& file_path, const std::string& model_name)
 {
-  assert(m_ray_sorting_strategy == random_shuffle);
+  std::ofstream myfile;
+
+  // make meaningful filename: (model + number_of_rays + date)
+  time_t t = time(NULL);
+  tm* timePtr = localtime(&t);
+
+  const std::string file_name = file_path 
+    + model_name
+    + "_" + std::to_string(ray_helper_vec.size()) 
+    + "_" + std::to_string(timePtr->tm_mday) 
+    + "_" + std::to_string(timePtr->tm_mon)
+    + ".ray_file";
+
+  std::cout << file_name << std::endl;
+
+  myfile.open(file_name);
+
+  for (auto cur_ray : ray_helper_vec)
+  {
+
+    myfile 
+      << cur_ray.origin_tmin.x << " "
+      << cur_ray.origin_tmin.y << " "
+      << cur_ray.origin_tmin.z << " "
+      << cur_ray.dir_tmax.x << " "
+      << cur_ray.dir_tmax.x << " "
+      << cur_ray.dir_tmax.x << " "
+      << cur_ray.origin_tmin.w << " "
+      << cur_ray.dir_tmax.z << " "
+      << std::endl;
+  }
+  myfile.close();
+}
+
+void RayGenerator::readRaysFromFile(const std::string& file_path, const uint number_of_rays)
+{
+  std::ifstream file(file_path);
+  std::string line;
+
+  int i = 0;
   ray_helper_vec.resize(number_of_rays);
+
+  while(std::getline(file, line))
+  {
+    std::vector<float> lineData;
+    std::stringstream lineStream(line);
+    float value;
+
+    while(lineStream >> value)
+    {
+      lineData.push_back(value);
+    }
+    
+    assert(lineData.size() == 8);
+    ray_helper_vec[i].make_ray(lineData[0], lineData[1], lineData[2], lineData[3], lineData[4], lineData[5], lineData[6], lineData[7]); 
+    i++;
+  }
+
+
+  for( int i = 0; i < ray_helper_vec.size(); i++)
+  {
+    printf("ray_helper_vec[i].make_ray(%f, %f, %f, %f, %f, %f, %f, %f); i++;\n",
+      ray_helper_vec[i].origin_tmin.x, ray_helper_vec[i].origin_tmin.y, ray_helper_vec[i].origin_tmin.z,
+      ray_helper_vec[i].dir_tmax.x, ray_helper_vec[i].dir_tmax.y, ray_helper_vec[i].dir_tmax.z,
+      ray_helper_vec[i].origin_tmin.w, ray_helper_vec[i].dir_tmax.w
+    );
+  }
+
 }
 
 void RayGenerator::uploadRaysToGPU()

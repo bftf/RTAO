@@ -7,7 +7,7 @@ BUILD_DIR = ./
 SRC_DIR = ../src/
 
 # OptiX
-USING_OPTIX = 0
+USING_OPTIX = 1
 OPTIX_INCLUDE_DIR = ~/Documents/RayTracing/NVIDIA-OptiX-SDK-5.1.0-linux64/include
 OPTIX_LIB = /home/francois/Documents/RayTracing/NVIDIA-OptiX-SDK-5.1.0-linux64/lib64/ # make sure this is in LD_LIBRARY_PATH
 

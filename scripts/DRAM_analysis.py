@@ -11,6 +11,8 @@ from enum import IntEnum
 THE USER HAS TO CHANGE THESE VARIABLES BASED ON the GPGPU-Sim OUTPUT
 ======================================================================
 '''
+'''
+filepath = '../build_make/output/teapot_test.txt'
 
 cudaRaysStart = 0xc0000000
 cudaRaysSize = 0x380
@@ -27,12 +29,118 @@ cudaInlinedPrimitivesSize = 0x5bafa0
 cudaPrimitiveIndicesStart = 0xc075a100
 cudaPrimitiveIndicesSize = 0x16ebe8
 
-# filepath = '../build_make/output/cwbvh_sponza_1_1_10k_DRAMExperiment.txt'
-# filepath = '../build_make/output/cwbvh_dragon_1_4_50k_DRAMExperiment.txt'
-filepath = '../build_make/output/teapot_test.txt'
-
 start_line = 683
 end_line = 13908
+'''
+
+'''
+filepath = '../build_make/output/dragon_50k_10_23.txt'
+
+cudaRaysStart = 0xc0000000
+cudaRaysSize = 0x27100
+
+cudaHitsStart = 0xc0027100
+cudaHitsSize = 0x13880
+
+cudaBVHNodeDataStart = 0xc003aa00
+cudaBVHNodeDataSize = 0x19eab0
+
+cudaInlinedPrimitivesStart = 0xc01d9500
+cudaInlinedPrimitivesSize = 0x5bafa0 
+
+cudaPrimitiveIndicesStart = 0xc0794500
+cudaPrimitiveIndicesSize = 0x16ebe8
+
+start_line = 688
+end_line = 463712
+'''
+
+'''
+filepath = '../build_make/output/dragon_200k_16_5_oct23.txt'
+
+cudaRaysStart = 0xc0000000
+cudaRaysSize = 0x61a800
+
+cudaHitsStart = 0xc061a800
+cudaHitsSize = 0x30d400
+
+cudaBVHNodeDataStart = 0xc0927c00
+cudaBVHNodeDataSize = 0x19eab0
+
+cudaInlinedPrimitivesStart = 0xc0ac6700
+cudaInlinedPrimitivesSize = 0x5bafa0 
+
+cudaPrimitiveIndicesStart = 0xc1081700
+cudaPrimitiveIndicesSize = 0x16ebe8
+
+start_line = 688
+end_line = 1251209616
+'''
+
+'''
+filepath = '../build_make/output/sponza_200k_16_5_oct23.txt'
+
+cudaRaysStart = 0xc0000000
+cudaRaysSize = 0x61a800
+
+cudaHitsStart = 0xc061a800
+cudaHitsSize = 0x30d400
+
+cudaBVHNodeDataStart = 0xc0927c00
+cudaBVHNodeDataSize = 0x4ac9f0
+
+cudaInlinedPrimitivesStart = 0xc0dd4600
+cudaInlinedPrimitivesSize = 0x11c5590 
+
+cudaPrimitiveIndicesStart = 0xc1f99c00
+cudaPrimitiveIndicesSize = 0x471564
+
+start_line = 1880
+end_line = 12994282
+'''
+
+'''
+filepath = '../build_make/output/teapot_200k_16_5_oct24.txt'
+
+cudaRaysStart = 0xc0000000
+cudaRaysSize = 0x61a800
+
+cudaHitsStart = 0xc061a800
+cudaHitsSize = 0x30d400
+
+cudaBVHNodeDataStart = 0xc0927c00
+cudaBVHNodeDataSize = 0x177a0
+
+cudaInlinedPrimitivesStart = 0xc093f400
+cudaInlinedPrimitivesSize = 0x6a620 
+
+cudaPrimitiveIndicesStart = 0xc09a9b00
+cudaPrimitiveIndicesSize = 0x1a988
+
+start_line = 688
+end_line = 10058076
+'''
+
+filepath = '../build_make/output/sanmig_200k_1_5_oct24.txt'
+
+cudaRaysStart = 0xc0000000
+cudaRaysSize = 0x61a800
+
+cudaHitsStart = 0xc061a800
+cudaHitsSize = 0x30d400
+
+cudaBVHNodeDataStart = 0xc0927c00
+cudaBVHNodeDataSize = 0xb06c3d0
+
+cudaInlinedPrimitivesStart = 0xcb994000
+cudaInlinedPrimitivesSize = 0x23e88a00 
+
+cudaPrimitiveIndicesStart = 0xef81ca00
+cudaPrimitiveIndicesSize = 0x8fa2280
+
+start_line = 687
+end_line = 36818413
+
 
 '''
 ======================================================================
