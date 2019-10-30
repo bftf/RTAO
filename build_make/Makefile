@@ -12,8 +12,8 @@ OPTIX_INCLUDE_DIR = ~/Documents/RayTracing/NVIDIA-OptiX-SDK-5.1.0-linux64/includ
 OPTIX_LIB = /home/francois/Documents/RayTracing/NVIDIA-OptiX-SDK-5.1.0-linux64/lib64/ # make sure this is in LD_LIBRARY_PATH
 
 # Embree3
-EMBREE_INCLUDE_DIR = /usr/local/include
-EMBREE_LIB = /usr/local/lib/
+EMBREE_INCLUDE_DIR = ~/Documents/RayTracing/embree/include
+EMBREE_LIB = ~/Documents/RayTracing/embree/build
 
 # CUDA
 # plain cuda, use this option for running on hardware not on gpgpu-sim

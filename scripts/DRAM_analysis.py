@@ -11,27 +11,27 @@ from enum import IntEnum
 THE USER HAS TO CHANGE THESE VARIABLES BASED ON the GPGPU-Sim OUTPUT
 ======================================================================
 '''
-'''
+
 filepath = '../build_make/output/teapot_test.txt'
 
 cudaRaysStart = 0xc0000000
-cudaRaysSize = 0x380
+cudaRaysSize = 0xc80 # 100 rays
 
-cudaHitsStart = 0xc0000400
-cudaHitsSize = 0x1c0
+cudaHitsStart = 0xc0000d00
+cudaHitsSize = 0x640
 
-cudaBVHNodeDataStart = 0xc0000600
-cudaBVHNodeDataSize = 0x19eab0
+cudaBVHNodeDataStart = 0xc0001400
+cudaBVHNodeDataSize = 0x177a0
 
-cudaInlinedPrimitivesStart = 0xc019f100
-cudaInlinedPrimitivesSize = 0x5bafa0 
+cudaInlinedPrimitivesStart = 0xc0018c00
+cudaInlinedPrimitivesSize = 0x6a620 
 
-cudaPrimitiveIndicesStart = 0xc075a100
-cudaPrimitiveIndicesSize = 0x16ebe8
+cudaPrimitiveIndicesStart = 0xc0083300
+cudaPrimitiveIndicesSize = 0x1a988
 
-start_line = 683
-end_line = 13908
-'''
+start_line = 687
+end_line = 6482
+
 
 '''
 filepath = '../build_make/output/dragon_50k_10_23.txt'
@@ -121,6 +121,7 @@ start_line = 688
 end_line = 10058076
 '''
 
+'''
 filepath = '../build_make/output/sanmig_200k_1_5_oct24.txt'
 
 cudaRaysStart = 0xc0000000
@@ -140,6 +141,7 @@ cudaPrimitiveIndicesSize = 0x8fa2280
 
 start_line = 687
 end_line = 36818413
+'''
 
 
 '''
@@ -159,24 +161,52 @@ class MemoryLevelEnum(IntEnum):
      L2_level = 1
      DRAM_level = 2
 
+     L2_hit = 3
+     L2_miss = 4
+     L2_rf = 5
+
+     L1C_hit = 6
+     L1C_miss = 7
+     L1C_rf = 8
+
+     L1T_hit = 9
+     L1T_miss = 10
+     L1T_rf = 11
+
+     L1D_hit = 12
+     L1D_miss = 13
+     L1D_rf = 14
+
+g_histogram = [0] * 6
+
 g_histogram_LDST = [0] * 6
 g_histogram_L2 = [0] * 6
 g_histogram_DRAM = [0] * 6
-g_histogram = [0] * 6
+
+g_histogram_L2_hit = [0] * 6
+g_histogram_L2_miss = [0] * 6
+g_histogram_L2_rf = [0] * 6
+
+g_histogram_L1C_hit = [0] * 6
+g_histogram_L1C_miss = [0] * 6
+g_histogram_L1C_rf = [0] * 6
+
+g_histogram_L1T_hit = [0] * 6
+g_histogram_L1T_miss = [0] * 6
+g_histogram_L1T_rf = [0] * 6
+
+g_histogram_L1D_hit = [0] * 6
+g_histogram_L1D_miss = [0] * 6
+g_histogram_L1D_rf = [0] * 6
 
 g_reuse_buffer_LDST = {}
 g_reuse_buffer_L2 = {}
 g_reuse_buffer_DRAM = {}
 g_reuse_buffer = {}
 
-def histogram_insert(enum_index, level):
+def histogram_insert(enum_index, level, cur_buffer):
   g_histogram[enum_index] += 1
-  if level == MemoryLevelEnum.LDST_level:
-    g_histogram_LDST[enum_index] +=1
-  elif level == MemoryLevelEnum.L2_level:
-    g_histogram_L2[enum_index] +=1
-  elif level == MemoryLevelEnum.DRAM_level:
-    g_histogram_DRAM[enum_index] +=1
+  cur_buffer[enum_index] += 1
 
 def insert_into_resue_buffer(address, cur_buffer):
   if address in cur_buffer:
@@ -193,7 +223,7 @@ def reuse_insert(address, enum_index, level):
   elif level == MemoryLevelEnum.DRAM_level:
     insert_into_resue_buffer(address, g_reuse_buffer_DRAM)
 
-def categorize(address, level):
+def categorize(address, level, cur_buffer):
   if address >= cudaRaysStart and address <=cudaRaysStart+cudaRaysSize:
     cur_buffer_enum_index = BufferEnum.cudaRays
   elif address >= cudaHitsStart and address <= cudaHitsStart+cudaHitsSize:
@@ -207,8 +237,8 @@ def categorize(address, level):
   else:
     cur_buffer_enum_index = BufferEnum.other
 
-  histogram_insert(cur_buffer_enum_index, level)
-  reuse_insert(address, cur_buffer_enum_index, level)
+  histogram_insert(cur_buffer_enum_index, level, cur_buffer)
+  # reuse_insert(address, cur_buffer_enum_index, level)
 
 def evaluate_histogram():
   print("======== Memory stats ========")
@@ -216,6 +246,25 @@ def evaluate_histogram():
   print("LDST: ", g_histogram_LDST)
   print("L2: ", g_histogram_L2)
   print("DRAM: ", g_histogram_DRAM)
+
+  
+  print("L2_hit: ", g_histogram_L2_hit)
+  print("L2_miss: ", g_histogram_L2_miss)
+  print("L2_rf: ", g_histogram_L2_rf)
+
+  print("L1D_hit: ", g_histogram_L1D_hit)
+  print("L1D_miss: ", g_histogram_L1D_miss)
+  print("L1D_rf: ", g_histogram_L1D_rf)
+
+  print("L1C_hit: ", g_histogram_L1C_hit)
+  print("L1C_miss: ", g_histogram_L1C_miss)
+  print("L1C_rf: ", g_histogram_L1C_rf)
+
+  print("L1T_hit: ", g_histogram_L1T_hit)
+  print("L1T_miss: ", g_histogram_L1T_miss)
+  print("L1T_rf: ", g_histogram_L1T_rf)
+  
+
   print("SUM: ", g_histogram)
 
 def evaluate_reuse():
@@ -269,21 +318,61 @@ def main():
 
         if level_label == "LDST":
           cur_label =  MemoryLevelEnum.LDST_level
+          cur_hist = g_histogram_LDST
         elif level_label == "L2":
           cur_label =  MemoryLevelEnum.L2_level
+          cur_hist = g_histogram_L2
         elif level_label == "DRAM":
           cur_label =  MemoryLevelEnum.DRAM_level
+          cur_hist = g_histogram_DRAM
+        elif level_label == "L2HIT":
+          cur_label =  MemoryLevelEnum.L2_hit
+          cur_hist = g_histogram_L2_hit
+        elif level_label == "L2MISS":
+          cur_label =  MemoryLevelEnum.L2_miss
+          cur_hist = g_histogram_L2_miss
+        elif level_label == "L2RF":
+          cur_label =  MemoryLevelEnum.L2_rf
+          cur_hist = g_histogram_L2_rf
+        elif level_label == "L1DHIT":
+          cur_label =  MemoryLevelEnum.L1D_hit
+          cur_hist = g_histogram_L1D_hit
+        elif level_label == "L1DMISS":
+          cur_label =  MemoryLevelEnum.L1D_miss
+          cur_hist = g_histogram_L1D_miss
+        elif level_label == "L1DRF":
+          cur_label =  MemoryLevelEnum.L1D_rf
+          cur_hist = g_histogram_L1D_rf
+        elif level_label == "L1CHIT":
+          cur_label =  MemoryLevelEnum.L1C_hit
+          cur_hist = g_histogram_L1C_hit
+        elif level_label == "L1CMISS":
+          cur_label =  MemoryLevelEnum.L1C_miss
+          cur_hist = g_histogram_L1C_miss
+        elif level_label == "L1CRF":
+          cur_label =  MemoryLevelEnum.L1C_rf
+          cur_hist = g_histogram_L1C_rf
+        elif level_label == "L1THIT":
+          cur_label =  MemoryLevelEnum.L1T_hit
+          cur_hist = g_histogram_L1T_hit
+        elif level_label == "L1TMISS":
+          cur_label =  MemoryLevelEnum.L1T_miss
+          cur_hist = g_histogram_L1T_miss
+        elif level_label == "L1TRF":
+          cur_label =  MemoryLevelEnum.L1T_rf
+          cur_hist = g_histogram_L1T_rf
+
         else:
           print("Problem categorizing this memory access (skipping this line):")
           print(cur_list)
           continue
         
-        categorize(address, cur_label)
+        categorize(address, cur_label, cur_hist)
 
 
 
     evaluate_histogram()
-    evaluate_reuse()
+    # evaluate_reuse()
     
 
 if __name__ == '__main__':

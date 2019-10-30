@@ -331,7 +331,7 @@ void RayGenerator::readRaysFromFile(const std::string& file_path, const uint num
   int i = 0;
   ray_helper_vec.resize(number_of_rays);
 
-  while(std::getline(file, line))
+  while(std::getline(file, line) && i < number_of_rays)
   {
     std::vector<float> lineData;
     std::stringstream lineStream(line);
@@ -345,6 +345,12 @@ void RayGenerator::readRaysFromFile(const std::string& file_path, const uint num
     assert(lineData.size() == 8);
     ray_helper_vec[i].make_ray(lineData[0], lineData[1], lineData[2], lineData[3], lineData[4], lineData[5], lineData[6], lineData[7]); 
     i++;
+  }
+
+  if (i < number_of_rays)
+  {
+    printf("parsing more rays than present in file. Aborting.\n");
+    assert(false);
   }
 }
 
