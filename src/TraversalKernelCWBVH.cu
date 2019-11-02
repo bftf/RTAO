@@ -412,7 +412,7 @@ __host__ void rtTraceCWBVH(
 	int* cudaFinishedRayCount;
 	cudaCheck(cudaMalloc(&cudaFinishedRayCount, sizeof(int)));
 
-	dim3 blockDim(32, 2); // (32, 2)
+	dim3 blockDim(32, 1); // (32, 2)
 	dim3 gridDim(32, 32);
 
 #if ENABLE_PROFILING==1

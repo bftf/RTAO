@@ -13,14 +13,14 @@ int main()
   const std::string ray_base_path = "/home/francois/Documents/RayTracing/CWBVH/build_make/ray_files/"; 
 
 
-  const std::string model_name = "teapot";
-  const std::string obj_path_addition = "/teapot/teapot.obj";
+  // const std::string model_name = "teapot";
+  // const std::string obj_path_addition = "/teapot/teapot.obj";
 
   // const std::string model_name = "sponza";
   // const std::string obj_path_addition = "sponza.obj";
 
-  // const std::string model_name = "dragon";
-  // const std::string obj_path_addition = "Dragon/dragon.obj";
+  const std::string model_name = "dragon";
+  const std::string obj_path_addition = "Dragon/dragon.obj";
 
   // const std::string model_name = "san-miguel";
   // const std::string obj_path_addition = "San_Miguel/san-miguel.obj";
@@ -32,11 +32,13 @@ int main()
   rg.loadModelOBJ(model_path);
   printf("Done loading obj\n");
   
-  //rg.generateObjectRays(100);
+  // rg.generateObjectRays(500000);
   printf("Done generating rays\n");
 
   // rg.saveRaysToFile(ray_base_path, model_name);
-  rg.readRaysFromFile(ray_base_path + "teapot_100_28_9.ray_file", 100);
+
+  rg.readRaysFromFile(ray_base_path + "dragon_500000_30_9.ray_file", 200000);
+  // rg.readRaysFromFile(ray_base_path + "teapot_100_28_9.ray_file", 100);
   
   // rg.fillWithListOfRays(); // fill custom list of rays for debugging
   
