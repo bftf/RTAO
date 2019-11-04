@@ -250,7 +250,7 @@ void RayGenerator::raySorting(std::vector<Ray>& v)
   }
 }
 
-void RayGenerator::generateObjectRays(uint number_of_rays)
+void RayGenerator::generateObjectRays(int number_of_rays)
 {
   for (int cur_samples_per_triangle = 0; cur_samples_per_triangle < samples_per_triangle; cur_samples_per_triangle++)
   {

@@ -16,7 +16,7 @@ class RayGenerator
 
   // generate ray_helper_vec and cudaRays - chose either one!
   void generateAORaysFromFile();
-  void generateObjectRays(uint number_of_rays=-1);
+  void generateObjectRays(int number_of_rays=-1);
   void RandomizeAndDownsizeRays();
   void uploadRaysToGPU();
   

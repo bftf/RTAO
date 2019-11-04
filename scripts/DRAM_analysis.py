@@ -10,7 +10,7 @@ from enum import IntEnum
 THE USER HAS TO CHANGE THESE VARIABLES BASED ON the GPGPU-Sim OUTPUT
 ======================================================================
 '''
-
+'''
 filepath = '../build_make/output/teapot_test.txt'
 
 cudaRaysStart = 0xc0000000
@@ -29,7 +29,8 @@ cudaPrimitiveIndicesStart = 0xc0083300
 cudaPrimitiveIndicesSize = 0x1a988
 
 start_line = 647
-end_line = 58488
+end_line = 100000
+'''
 
 '''
 filepath = '../build_make/output/dragon_50k_10_23.txt'
@@ -53,8 +54,7 @@ start_line = 688
 end_line = 5000
 '''
 
-'''
-filepath = '../build_make/output/dragon_200k_4_8_oct30_logAll.txt'
+filepath = '../build_make/output/dragon_200k_rayFile_nov3_bypassL2.txt'
 
 cudaRaysStart = 0xc0000000
 cudaRaysSize = 0x61a800
@@ -71,10 +71,8 @@ cudaInlinedPrimitivesSize = 0x5bafa0
 cudaPrimitiveIndicesStart = 0xc1081700
 cudaPrimitiveIndicesSize = 0x16ebe8
 
-start_line = 688
-end_line = 63629135
-'''
-
+start_line = 647
+end_line = 60000000
 
 '''
 filepath = '../build_make/output/sponza_200k_16_5_oct23.txt'
@@ -224,15 +222,15 @@ def insert_into_resue_buffer(address, cur_buffer):
     cur_buffer[address] = 1
 
 def categorize(address):
-  if address >= cudaRaysStart and address <=cudaRaysStart+cudaRaysSize:
+  if address >= cudaRaysStart and address < cudaRaysStart+cudaRaysSize:
     cur_buffer_enum_index = BufferEnum.cudaRays
-  elif address >= cudaHitsStart and address <= cudaHitsStart+cudaHitsSize:
+  elif address >= cudaHitsStart and address < cudaHitsStart+cudaHitsSize:
     cur_buffer_enum_index = BufferEnum.cudaHits
-  elif address >= cudaBVHNodeDataStart and address <= cudaBVHNodeDataStart+cudaBVHNodeDataSize:
+  elif address >= cudaBVHNodeDataStart and address < cudaBVHNodeDataStart+cudaBVHNodeDataSize:
     cur_buffer_enum_index = BufferEnum.cudaBVHNodeData
-  elif address >= cudaInlinedPrimitivesStart and address <= cudaInlinedPrimitivesStart+cudaInlinedPrimitivesSize:
+  elif address >= cudaInlinedPrimitivesStart and address < cudaInlinedPrimitivesStart+cudaInlinedPrimitivesSize:
     cur_buffer_enum_index = BufferEnum.cudaInlinedPrimitives
-  elif address >= cudaPrimitiveIndicesStart and address <= cudaPrimitiveIndicesStart+cudaPrimitiveIndicesSize:
+  elif address >= cudaPrimitiveIndicesStart and address < cudaPrimitiveIndicesStart+cudaPrimitiveIndicesSize:
     cur_buffer_enum_index = BufferEnum.cudaPrimitiveIndices
   elif address >= 0xf0000000:
     cur_buffer_enum_index = BufferEnum.instructions
@@ -378,6 +376,10 @@ def main():
     cur_line_count = 0
     for line in fp:
       cur_line_count += 1
+
+      if "Destroy streams for kernel" in line:
+        print("Exit keywords detected")
+        break
       if cur_line_count >= end_line:
         break
       elif cur_line_count < start_line:
@@ -387,8 +389,8 @@ def main():
         cur_list = line.split(",")
         
         if len(cur_list) != 5:
-          print("Problem parsing this memory access (skipping this line):")
-          print(cur_list)
+          #print("Problem parsing this memory access (skipping this line):")
+          #print(cur_list)
           continue
 
         level_label = cur_list[0]
