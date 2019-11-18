@@ -7,6 +7,7 @@ bin
 build
 visualizer_data
 build_make
+scripts/output/*
 
 CMakeCache.txt
 CMakeFiles
