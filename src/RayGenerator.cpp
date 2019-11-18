@@ -35,8 +35,8 @@ static bool compareByOrigin(const Ray &a, const Ray &b)
   float4 a_o = a.origin_tmin;
   float4 b_o = b.origin_tmin;
 
-  float a_o_d = sqrt(a_o.x * a_o.x + a_o.y * a_o.y + a_o.z * a_o.z);
-  float b_o_d = sqrt(b_o.x * b_o.x + b_o.y * b_o.y + b_o.z * b_o.z);
+  float a_o_d = sqrt(a_o.x * a_o.x + a_o.y * a_o.y + a_o.z * a_o.z); // distance to origin
+  float b_o_d = sqrt(b_o.x * b_o.x + b_o.y * b_o.y + b_o.z * b_o.z); // distance to origin
 
   return a_o_d < b_o_d;
 }
@@ -224,28 +224,47 @@ void RayGenerator::generatePointInsideTriangle(
     out_normal = (1 - sqrt(r1)) * n_a + (sqrt(r1) * (1 - r2)) * n_b + (sqrt(r1) * r2) * n_c;
   }
 
-void RayGenerator::raySorting(std::vector<Ray>& v)
+void RayGenerator::raySorting(const ray_sorting sorting_strategy)
 {
-  switch(m_ray_sorting_strategy)
+  switch(sorting_strategy)
   {
     case no_sort: { break; }
     case random_shuffle: 
     {
-      // sorting goes here!
       std::random_device rd;
       std::mt19937 g(rd());
-      std::shuffle(v.begin(), v.end(), g);
+      std::shuffle(ray_helper_vec.begin(), ray_helper_vec.end(), g);
       break;
     }
     case direction:
     {
-      sort(v.begin(), v.end(), compareByDirection);
+      sort(ray_helper_vec.begin(), ray_helper_vec.end(), compareByDirection);
       break;
     }
     case origin:
     {
-      sort(v.begin(), v.end(), compareByOrigin);
+      sort(ray_helper_vec.begin(), ray_helper_vec.end(), compareByOrigin);
       break;
+    }
+    case origin_chunk:
+    {
+      int chunk_size = 8192;
+      int cur_index = 0;
+      
+      while (cur_index < ray_helper_vec.size())
+      {
+        auto begin_it = ray_helper_vec.begin() + cur_index;
+        auto end_it = ray_helper_vec.begin() + cur_index + chunk_size;
+        end_it = min(end_it, ray_helper_vec.end());
+
+        sort(begin_it, end_it, compareByOrigin);
+        cur_index += chunk_size;
+      }
+      break;
+    }
+    default:
+    {
+      assert(false);
     }
   }
 }
@@ -270,12 +289,8 @@ void RayGenerator::generateObjectRays(int number_of_rays)
     if (number_of_rays > 0 && ray_helper_vec.size() > number_of_rays) break;
   }
 
-
-  raySorting(ray_helper_vec);
-
   if (number_of_rays > 0)
   {
-    assert(m_ray_sorting_strategy == random_shuffle);
     ray_helper_vec.resize(number_of_rays);
   }
 }
@@ -284,6 +299,18 @@ void RayGenerator::uploadRaysToGPU()
 {
   cudaRays = GenerateRaysFromFile(ray_helper_vec, ray_helper_vec.size());
   unsigned long cuda_rays_size = sizeof(Ray) * ray_helper_vec.size();
+  print_helper::print_buffer("cudaRays", cuda_rays_size, (void*)cudaRays);
+}
+
+void RayGenerator::uploadSingleRayToGPU(int ray_id)
+{
+  std::vector<Ray> helper_vec;
+  helper_vec.push_back(ray_helper_vec[ray_id]);
+
+  assert(helper_vec.size() == 1);
+  
+  cudaRays = GenerateRaysFromFile(helper_vec, helper_vec.size());
+  unsigned long cuda_rays_size = sizeof(Ray) * helper_vec.size();
   print_helper::print_buffer("cudaRays", cuda_rays_size, (void*)cudaRays);
 }
 
@@ -314,10 +341,10 @@ void RayGenerator::saveRaysToFile(const std::string& file_path, const std::strin
       << cur_ray.origin_tmin.y << " "
       << cur_ray.origin_tmin.z << " "
       << cur_ray.dir_tmax.x << " "
-      << cur_ray.dir_tmax.x << " "
-      << cur_ray.dir_tmax.x << " "
-      << cur_ray.origin_tmin.w << " "
+      << cur_ray.dir_tmax.y << " "
       << cur_ray.dir_tmax.z << " "
+      << cur_ray.origin_tmin.w << " "
+      << cur_ray.dir_tmax.w << " "
       << std::endl;
   }
   myfile.close();

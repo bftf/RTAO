@@ -64,6 +64,12 @@ void RayTraceManager::traceCWBVH(RayGenerator& rg)
   rtTraceCWBVH(rg.cudaRays, cudaHits, numRays); 
 }
 
+void RayTraceManager::traceCWBVHSingleRay(RayGenerator& rg)
+{
+  numRays = 1; // this is a hack!
+  rtTraceCWBVH(rg.cudaRays, cudaHits, numRays); 
+}
+
 void RayTraceManager::traceOptiX(RayGenerator& rg)
 {
   /*TODO!!*/

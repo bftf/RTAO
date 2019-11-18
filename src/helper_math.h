@@ -47,13 +47,16 @@ namespace print_helper
 {
     inline void print_buffer(const std::string& name, const unsigned long byte_count, const void* const ptr)
     {
-      std::cout << name << " at address: " << ptr << std::endl;
+      std::cout << name << " " << ptr << " 0x" << std::hex << byte_count << std::endl;
+
+      /*
       std::cout << name << " size: " <<
       "0x" << std::hex << byte_count << " bytes " << 
       byte_count/1024.f  << " kB " <<
       byte_count/(1024.f*1024.f)  << " MB " <<
       byte_count/(1024.f*1024.f*1024.f)  << " GB " << 
-      std::endl;  
+      std::endl;
+      */
     }
 }
 

@@ -10,140 +10,27 @@ from enum import IntEnum
 THE USER HAS TO CHANGE THESE VARIABLES BASED ON the GPGPU-Sim OUTPUT
 ======================================================================
 '''
-'''
-filepath = '../build_make/output/teapot_test.txt'
 
-cudaRaysStart = 0xc0000000
-cudaRaysSize = 0xc80 # 100 rays
-
-cudaHitsStart = 0xc0000d00
-cudaHitsSize = 0x640
-
-cudaBVHNodeDataStart = 0xc0001400
-cudaBVHNodeDataSize = 0x177a0
-
-cudaInlinedPrimitivesStart = 0xc0018c00
-cudaInlinedPrimitivesSize = 0x6a620 
-
-cudaPrimitiveIndicesStart = 0xc0083300
-cudaPrimitiveIndicesSize = 0x1a988
-
-start_line = 647
-end_line = 100000
-'''
-
-'''
-filepath = '../build_make/output/dragon_50k_10_23.txt'
-
-cudaRaysStart = 0xc0000000
-cudaRaysSize = 0x27100
-
-cudaHitsStart = 0xc0027100
-cudaHitsSize = 0x13880
-
-cudaBVHNodeDataStart = 0xc003aa00
-cudaBVHNodeDataSize = 0x19eab0
-
-cudaInlinedPrimitivesStart = 0xc01d9500
-cudaInlinedPrimitivesSize = 0x5bafa0 
-
-cudaPrimitiveIndicesStart = 0xc0794500
-cudaPrimitiveIndicesSize = 0x16ebe8
-
-start_line = 688
-end_line = 5000
-'''
-
-filepath = '../build_make/output/dragon_200k_rayFile_nov3_bypassL2.txt'
-
-cudaRaysStart = 0xc0000000
-cudaRaysSize = 0x61a800
-
-cudaHitsStart = 0xc061a800
-cudaHitsSize = 0x30d400
-
-cudaBVHNodeDataStart = 0xc0927c00
-cudaBVHNodeDataSize = 0x19eab0
-
-cudaInlinedPrimitivesStart = 0xc0ac6700
-cudaInlinedPrimitivesSize = 0x5bafa0 
-
-cudaPrimitiveIndicesStart = 0xc1081700
-cudaPrimitiveIndicesSize = 0x16ebe8
-
-start_line = 647
-end_line = 60000000
-
-'''
-filepath = '../build_make/output/sponza_200k_16_5_oct23.txt'
-
-cudaRaysStart = 0xc0000000
-cudaRaysSize = 0x61a800
-
-cudaHitsStart = 0xc061a800
-cudaHitsSize = 0x30d400
-
-cudaBVHNodeDataStart = 0xc0927c00
-cudaBVHNodeDataSize = 0x4ac9f0
-
-cudaInlinedPrimitivesStart = 0xc0dd4600
-cudaInlinedPrimitivesSize = 0x11c5590 
-
-cudaPrimitiveIndicesStart = 0xc1f99c00
-cudaPrimitiveIndicesSize = 0x471564
-
-start_line = 1880
-end_line = 12994282
-'''
-
-'''
-filepath = '../build_make/output/teapot_200k_16_5_oct24.txt'
-
-cudaRaysStart = 0xc0000000
-cudaRaysSize = 0x61a800
-
-cudaHitsStart = 0xc061a800
-cudaHitsSize = 0x30d400
-
-cudaBVHNodeDataStart = 0xc0927c00
-cudaBVHNodeDataSize = 0x177a0
-
-cudaInlinedPrimitivesStart = 0xc093f400
-cudaInlinedPrimitivesSize = 0x6a620 
-
-cudaPrimitiveIndicesStart = 0xc09a9b00
-cudaPrimitiveIndicesSize = 0x1a988
-
-start_line = 688
-end_line = 10058076
-'''
-
-'''
-filepath = '../build_make/output/sanmig_200k_rayFile_L2_10_30.txt'
-
-cudaRaysStart = 0xc0000000
-cudaRaysSize = 0x61a800
-
-cudaHitsStart = 0xc061a800
-cudaHitsSize = 0x30d400
-
-cudaBVHNodeDataStart = 0xc0927c00
-cudaBVHNodeDataSize = 0x10452bc0
-
-cudaInlinedPrimitivesStart = 0xd0d7a800
-cudaInlinedPrimitivesSize = 0x332a2790 
-
-cudaPrimitiveIndicesStart = 0x10401d000
-cudaPrimitiveIndicesSize = 0xcca89e4
-
-start_line = 686
-end_line = 3393038
-'''
+# filepath = '../build_make/output/sponza_200k_rayFile_nov7_bypassL2.txt'
+# filepath = '../build_make/output/debugging.txt'
+# filepath = '../build_make/output/sponza_200k_rayFile_nov12_origin_nodf.txt'
+filepath =  '../build_make/output/sponza_200k_rayFile_nov13_random_nodf.txt'
 
 
 '''
 ======================================================================
 '''
+
+cudaRaysStart = 0x0
+cudaRaysSize = 0x0 
+cudaHitsStart = 0x0
+cudaHitsSize = 0x0
+cudaBVHNodeDataStart = 0x0
+cudaBVHNodeDataSize = 0x0
+cudaInlinedPrimitivesStart = 0x0
+cudaInlinedPrimitivesSize = 0x0 
+cudaPrimitiveIndicesStart = 0x0
+cudaPrimitiveIndicesSize = 0x0
 
 class BufferEnum(IntEnum):
      cudaRays = 0
@@ -222,13 +109,13 @@ def insert_into_resue_buffer(address, cur_buffer):
     cur_buffer[address] = 1
 
 def categorize(address):
-  if address >= cudaRaysStart and address < cudaRaysStart+cudaRaysSize:
+  if address >= cudaRaysStart and address < cudaHitsStart:
     cur_buffer_enum_index = BufferEnum.cudaRays
-  elif address >= cudaHitsStart and address < cudaHitsStart+cudaHitsSize:
+  elif address >= cudaHitsStart and address < cudaBVHNodeDataStart:
     cur_buffer_enum_index = BufferEnum.cudaHits
-  elif address >= cudaBVHNodeDataStart and address < cudaBVHNodeDataStart+cudaBVHNodeDataSize:
+  elif address >= cudaBVHNodeDataStart and address < cudaInlinedPrimitivesStart:
     cur_buffer_enum_index = BufferEnum.cudaBVHNodeData
-  elif address >= cudaInlinedPrimitivesStart and address < cudaInlinedPrimitivesStart+cudaInlinedPrimitivesSize:
+  elif address >= cudaInlinedPrimitivesStart and address < cudaPrimitiveIndicesStart:
     cur_buffer_enum_index = BufferEnum.cudaInlinedPrimitives
   elif address >= cudaPrimitiveIndicesStart and address < cudaPrimitiveIndicesStart+cudaPrimitiveIndicesSize:
     cur_buffer_enum_index = BufferEnum.cudaPrimitiveIndices
@@ -364,13 +251,93 @@ def evaluate_reuse():
   evaluate_reuse_in_buffer(g_reuse_buffer_L2, 'L2')
   evaluate_reuse_in_buffer(g_reuse_buffer_DRAM, 'DRAM')
 
+def evaluate_hit_rate(name, hit_buffer, miss_buffer):
+  miss_rates = [0] * (BufferEnum.num_elements + 1)
+  total_miss = 0
+  total_access = 0
+  
+  for index, (cur_hit_count, cur_miss_count) in enumerate(zip(hit_buffer, miss_buffer)):
+    total_miss += cur_miss_count
+    total_access += cur_miss_count + cur_hit_count
+    miss_rates[index] = cur_miss_count / (cur_miss_count + cur_hit_count) if cur_miss_count else 0
+    
+  miss_rates[BufferEnum.num_elements] = total_miss / total_access if total_access else 0
+  print("Miss rate " + name +": " + str(miss_rates))
+
+def evaluate_hit_rates():
+  print("Label: #cudaRays, #cudaHits, #cudaBVHNodeData, #cudaInlinedPrimitives, #cudaPrimitiveIndices, #other, #instructions, total")
+  evaluate_hit_rate("L1D", g_histogram_L1D_hit, g_histogram_L1D_miss)
+  evaluate_hit_rate("L1C", g_histogram_L1C_hit, g_histogram_L1C_miss)
+  evaluate_hit_rate("L2", g_histogram_L2_hit, g_histogram_L2_miss)
+
+l2_addresses = {}
+l2_line_size = 128
+cold_miss = 0
+l2_hits = 0
+
+def insert_l2_address(addr):
+  global cold_miss
+  global l2_hits 
+  global l2_line_size
+
+  block_address = addr & ~(l2_line_size-1)
+
+  if block_address not in l2_addresses:
+    l2_addresses[block_address] = 1
+    cold_miss += 1
+  else:
+    l2_addresses[block_address] += 1
+    l2_hits += 1
+
+dram_addresses = {}
+
+def insert_dram_address(addr):
+  global l2_line_size
+
+  block_address = addr & ~(l2_line_size-1)
+
+  if block_address not in dram_addresses:
+    dram_addresses[block_address] = 1
+  else:
+    dram_addresses[block_address] += 1
+
+def compute_l2_cold_miss_rate():
+  print("l2 cold misses: ", cold_miss)
+  print("l2 max hits: ", l2_hits)
+  print("l2 upper limit miss rate: ", cold_miss/(l2_hits + cold_miss))
+  print("actual DRAM accesses: ", sum(g_histogram_DRAM))
+
+  sorted_l2_addresses = sorted(l2_addresses.items(), key=operator.itemgetter(1), reverse=True)
+  
+  for index, (address, hit_count) in enumerate(sorted_l2_addresses):
+    # do lookup in DRAM histogram
+    dram_count = 0
+    if address in dram_addresses:
+      dram_count = dram_addresses[address]
+
+    print(str(hex(address)) + " was hit: " + str(hit_count) + ", label: " + str(categorize(address)) + ", dram count: " + str(dram_count))
+    if index > 1000:
+      break
+
 def main():
+
+  global cudaRaysStart
+  global cudaRaysSize 
+  global cudaHitsStart
+  global cudaHitsSize
+  global cudaBVHNodeDataStart
+  global cudaBVHNodeDataSize
+  global cudaInlinedPrimitivesStart
+  global cudaInlinedPrimitivesSize 
+  global cudaPrimitiveIndicesStart
+  global cudaPrimitiveIndicesSize
 
   if not os.path.isfile(filepath):
      print("File path {} does not exist. Exiting...".format(filepath))
      sys.exit()
 
   memory_accesses = {}
+  first_mem_access = True
 
   with open(filepath) as fp:
     cur_line_count = 0
@@ -380,23 +347,61 @@ def main():
       if "Destroy streams for kernel" in line:
         print("Exit keywords detected")
         break
-      if cur_line_count >= end_line:
-        break
-      elif cur_line_count < start_line:
-        continue
+      elif "cudaRays" in line and len(line.split(" ")) == 3:
+        cur_list = line.split(" ")
+        cudaRaysStart = int(cur_list[1], 16)
+        cudaRaysSize = int(cur_list[2], 16)
+      elif "cudaHits" in line and len(line.split(" ")) == 3:
+        cur_list = line.split(" ")
+        cudaHitsStart = int(cur_list[1], 16)
+        cudaHitsSize = int(cur_list[2], 16)
+      elif "cudaBVHNodeData" in line and len(line.split(" ")) == 3:
+        cur_list = line.split(" ")
+        cudaBVHNodeDataStart = int(cur_list[1], 16)
+        cudaBVHNodeDataSize = int(cur_list[2], 16)
+      elif "cudaInlinedPrimitives" in line and len(line.split(" ")) == 3:
+        cur_list = line.split(" ")
+        cudaInlinedPrimitivesStart = int(cur_list[1], 16)
+        cudaInlinedPrimitivesSize = int(cur_list[2], 16)
+      elif "cudaPrimitiveIndices" in line and len(line.split(" ")) == 3:
+        cur_list = line.split(" ")
+        cudaPrimitiveIndicesStart = int(cur_list[1], 16)
+        cudaPrimitiveIndicesSize = int(cur_list[2], 16)
       else:
         line = line.replace(':', ',')
-        cur_list = line.split(",")
+        cur_list = line.split(" ")
         
-        if len(cur_list) != 5:
-          #print("Problem parsing this memory access (skipping this line):")
-          #print(cur_list)
+        if len(cur_list) != 6:
+          # print("Problem parsing this memory access (skipping this line):")
+          # print(cur_list)
+          continue
+        try:
+          level_label = cur_list[0]
+          sid = int(cur_list[1], 16) # interpret as hex
+          wip = int(cur_list[2], 16)
+          address = int(cur_list[3], 16)
+          read_or_write = int(cur_list[4]) 
+          size = int(cur_list[5], 16)
+        except:
+          print(cur_list)
           continue
 
-        level_label = cur_list[0]
-        sid = int(cur_list[1])
-        wip = int(cur_list[2])
-        address = int(cur_list[3], 16) # interpret as hex
+        if (first_mem_access == True):
+          first_mem_access = False
+          assert(cudaRaysStart > 0 and cudaRaysSize > 0 and cudaBVHNodeDataStart > 0 and cudaBVHNodeDataSize > 0)
+          assert(cudaInlinedPrimitivesStart > 0 and cudaInlinedPrimitivesSize > 0 and cudaPrimitiveIndicesStart > 0 and cudaPrimitiveIndicesSize > 0)
+
+          print('cudaRaysStart: ' + str(hex(cudaRaysStart)))
+          print('cudaRaysSize: ' + str(hex(cudaRaysSize)))
+          print('cudaHitsStart: ' + str(hex(cudaHitsStart)))
+          print('cudaHitsSize: ' + str(hex(cudaHitsSize)))
+          print('cudaBVHNodeDataStart: ' + str(hex(cudaBVHNodeDataStart)))
+          print('cudaBVHNodeDataSize: ' + str(hex(cudaBVHNodeDataSize)))
+          print('cudaInlinedPrimitivesStart: ' + str(hex(cudaInlinedPrimitivesStart)))
+          print('cudaInlinedPrimitivesSize: ' + str(hex(cudaInlinedPrimitivesSize)))
+          print('cudaPrimitiveIndicesStart: ' + str(hex(cudaPrimitiveIndicesStart))) 
+          print('cudaPrimitiveIndicesSize: ' + str(hex(cudaPrimitiveIndicesSize)))
+          print('Start Parsing started')
 
         cur_reuse = -1
 
@@ -486,11 +491,19 @@ def main():
         if cur_reuse is not -1 and cur_buffer_enum_index is not BufferEnum.instructions:
           insert_into_resue_buffer(address, cur_reuse)
 
+        # compute l2 cold misses
+        if level_label == 'L2HIT' or level_label == 'L2MISS':
+          insert_l2_address(address)
+
+        # generate DRAM histogram
+        if level_label == 'DRAM':
+          insert_dram_address(address)
 
     # print stats
     evaluate_histogram()
     evaluate_reuse()
-    
+    evaluate_hit_rates()
+    compute_l2_cold_miss_rate()
 
 if __name__ == '__main__':
   main()

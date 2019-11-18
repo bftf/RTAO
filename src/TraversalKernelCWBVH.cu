@@ -413,7 +413,13 @@ __host__ void rtTraceCWBVH(
 	cudaCheck(cudaMalloc(&cudaFinishedRayCount, sizeof(int)));
 
 	dim3 blockDim(32, 1); // (32, 2)
+
+#if DYNAMIC_FETCH
 	dim3 gridDim(32, 32);
+#else
+  printf("dynamic fetch disabled for CWBVH \n");
+  dim3 gridDim(idivCeil(rayCount, blockDim.x), 1);
+#endif
 
 #if ENABLE_PROFILING==1
 	cudaProfilerStart();

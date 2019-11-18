@@ -19,12 +19,16 @@ class RayGenerator
   void generateObjectRays(int number_of_rays=-1);
   void RandomizeAndDownsizeRays();
   void uploadRaysToGPU();
+  void uploadSingleRayToGPU(int ray_id);
   
   int getRayCount() { return ray_helper_vec.size(); }
 
   // ray file IO - this is used to make rays deterministic
   void saveRaysToFile(const std::string& file_path, const std::string& model_name);
   void readRaysFromFile(const std::string& file_path, const uint number_of_rays);
+
+  enum ray_sorting { no_sort, random_shuffle, direction, origin, origin_chunk};
+  void raySorting(const ray_sorting sorting_strategy = m_ray_sorting_strategy);
 
   // debugging
   void fillWithListOfRays();
@@ -56,10 +60,7 @@ class RayGenerator
     const float3 n_a, const float3 n_b, const float3 n_c, 
     float3& out_point, float3& out_normal);
 
-  enum ray_sorting { no_sort, random_shuffle, direction, origin };
-  ray_sorting m_ray_sorting_strategy = random_shuffle;
-
-  void raySorting(std::vector<Ray>& v);
+  static const ray_sorting m_ray_sorting_strategy = direction;
   
   friend class BVHManager;
   friend class RayTraceManager;

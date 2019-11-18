@@ -7,7 +7,7 @@ BUILD_DIR = ./
 SRC_DIR = ../src/
 
 # OptiX
-USING_OPTIX = 1
+USING_OPTIX=0# 1 enables OptiX
 OPTIX_INCLUDE_DIR = ~/Documents/RayTracing/NVIDIA-OptiX-SDK-5.1.0-linux64/include
 OPTIX_LIB = /home/francois/Documents/RayTracing/NVIDIA-OptiX-SDK-5.1.0-linux64/lib64/ # make sure this is in LD_LIBRARY_PATH
 
@@ -21,13 +21,15 @@ EMBREE_LIB = ~/Documents/RayTracing/embree/build
 NVCC = nvcc
 NVCCFLAGS = -c -g -std=c++11
 CUDAARCH = -gencode arch=compute_75,code=compute_75
-ifeq ($(USING_OPTIX), 0)
-LFLAGS = -lcuda --cudart shared -lembree3 -ltbb -loptix_prime -loptix
-DFLAGS = -DOPTIX_PRIME
+
+ifeq "$(USING_OPTIX)" "1"
+	LFLAGS = -lcuda --cudart shared -lembree3 -ltbb -loptix_prime -loptix
+	DFLAGS = -DOPTIX_PRIME
 else
-LFLAGS = -lcuda --cudart shared -lembree3 -ltbb
-DFLAGS = 
+	LFLAGS = -lcuda --cudart shared -lembree3 -ltbb
+	DFLAGS = 
 endif
+
 GPUDEBUGFLAG = -G # Only use it when debugging the kernel in cuda gdb, don't set this when running with GPGPU-Sim!
 
 
@@ -45,3 +47,4 @@ cpu:
 clean:
 	find . -type f -name _cuobjdump_list_ptx_\* -exec rm {} \;
 	find . -type f -name _app_cuda_version_\* -exec rm {} \;
+	rm -f *.o

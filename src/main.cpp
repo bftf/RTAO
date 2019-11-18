@@ -16,11 +16,11 @@ int main()
   // const std::string model_name = "teapot";
   // const std::string obj_path_addition = "/teapot/teapot.obj";
 
-  // const std::string model_name = "sponza";
-  // const std::string obj_path_addition = "Sponza/models/sponza.obj";
+  const std::string model_name = "sponza";
+  const std::string obj_path_addition = "Sponza/models/sponza.obj";
 
-  const std::string model_name = "dragon";
-  const std::string obj_path_addition = "Dragon/dragon.obj";
+  // const std::string model_name = "dragon";
+  // const std::string obj_path_addition = "Dragon/dragon.obj";
 
   // const std::string model_name = "san-miguel";
   // const std::string obj_path_addition = "San_Miguel/san-miguel.obj";
@@ -28,43 +28,82 @@ int main()
   const std::string out_ply_path = ply_base_path + model_name + ".ply";
   const std::string model_path = model_base_path + obj_path_addition;
 
-  RayGenerator rg = RayGenerator(1, 1, 0.1, 10); /*spp, spt, t_min, t_max*/
+  RayGenerator rg = RayGenerator(8, 8, 0.1, 10); /*spp, spt, t_min, t_max*/
 
+  /* Load the model */ 
   rg.loadModelOBJ(model_path);
   printf("Done loading obj\n");
-  
-  // rg.generateObjectRays(200000);
+
+  /* Generate rays -> this takes a while
+  rg.generateObjectRays();
   printf("Done generating rays\n");
+  rg.saveRaysToFile(ray_base_path, model_name);
+  */
 
-  // rg.saveRaysToFile(ray_base_path, model_name);
+  /* Shuffle and save to file -> this should only be done once
+  rg.raySorting(rg.random_shuffle);
+  rg.saveRaysToFile(ray_base_path, model_name + "_randomshuffle");
 
-  // rg.readRaysFromFile(ray_base_path + "sponza_200000_3_10.ray_file", 200000);
-  rg.readRaysFromFile(ray_base_path + "dragon_500000_30_9.ray_file", 200000);
+  rg.raySorting(rg.origin);
+  rg.saveRaysToFile(ray_base_path, model_name + "_origin");
+
+  rg.raySorting(rg.random_shuffle);
+  rg.raySorting(rg.direction);
+  rg.saveRaysToFile(ray_base_path, model_name + "_direction");
+  
+  rg.readRaysFromFile(ray_base_path + "sponza_randomshuffle_16785088_12_10.ray_file", 16785088);
+  rg.raySorting(rg.origin_chunk);
+  rg.saveRaysToFile(ray_base_path, model_name + "_origin_chunk_8192");
+
+  printf("Done sorting rays\n");
+  exit(0);
+  */
+
+  // rg.readRaysFromFile(ray_base_path + "sponza_randomshuffle_16785088_12_10.ray_file", 16785088);
+  // rg.readRaysFromFile(ray_base_path + "sponza_direction_16785088_12_10.ray_file", 16785088);
+  // rg.readRaysFromFile(ray_base_path + "sponza_origin_16785088_12_10.ray_file", 16785088);
+
+  rg.readRaysFromFile(ray_base_path + "sponza_randomshuffle_16785088_12_10.ray_file", 200000);
+  // rg.readRaysFromFile(ray_base_path + "sponza_origin_chunk_8192_16785088_13_10.ray_file", 16785088);
+  // rg.readRaysFromFile(ray_base_path + "sponza_direction_16785088_12_10.ray_file", 200000);
+  // rg.readRaysFromFile(ray_base_path + "sponza_origin_16785088_12_10.ray_file", 200000);
+
+  // rg.readRaysFromFile(ray_base_path + "dragon_500000_30_9.ray_file", 200000);
   // rg.readRaysFromFile(ray_base_path + "teapot_100_28_9.ray_file", 100);
   
   // rg.fillWithListOfRays(); // fill custom list of rays for debugging
   
-  rg.uploadRaysToGPU();
+  // rg.uploadRaysToGPU();
 
 
   BVHManager bvh_manager = BVHManager();
   RayTraceManager rt_manager = RayTraceManager(rg);
 
+  // bvh_manager.buildBVH2(rg);
+  bvh_manager.buildCWBVH(rg);
+
+
+  for (int i=0; i < 5000; i++)
+  {
+    rg.uploadSingleRayToGPU(i);
+    rt_manager.traceCWBVHSingleRay(rg);
+    printf("Done tracing ray number: %i\n", i);
+  }
+
 
   /* OptiX */
   // rt_manager.traceOptiXPrime(rg);
 
-  /* Aila */
-  // bvh_manager.buildBVH2(rg);
+  /* Aila */    
   // rt_manager.traceAila(rg); 
-  
+
   /* CWBVH */
-  bvh_manager.buildCWBVH(rg);
-  printf("Start tracing %i rays \n", rg.getRayCount());
-  rt_manager.traceCWBVH(rg);
+  // rt_manager.traceCWBVH(rg);
 
+  
+  
 
-  // rt_manager.evaluateAndPrintForPLYVisualization(rg, out_ply_path); // prints outcome from kernels for visualization
+  // rt_manager.evaluateAndPrintForPLYVisualization(rg, out_ply_path); // prints outcome from kernels for visualization (make sure 8, 8 is enabled when reading from file!)
   // rt_manager.debugging(rg); // for debugging - prints output of kernels into command line
   
   printf("Done, traced %i rays \n", rg.getRayCount());
