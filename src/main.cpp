@@ -8,11 +8,11 @@
 
 int main()
 {
+  const std::string model_base_path = "/home/francois/Documents/RayTracing/models/"; // pc-12
+  // const std::string model_base_path = "/home/francois/Documents/RayTracing/models/"; // pc-16
 
-  const std::string ply_base_path = "/home/francois/Documents/RayTracing/CWBVH/build_make/ply_files/";
-  const std::string model_base_path = "/home/francois/Documents/RayTracing/models/";
-  const std::string ray_base_path = "/home/francois/Documents/RayTracing/CWBVH/build_make/ray_files/"; 
-
+  const std::string ply_base_path = "./ply_files/";
+  const std::string ray_base_path = "./ray_files/"; 
 
   // const std::string model_name = "teapot";
   // const std::string obj_path_addition = "/teapot/teapot.obj";
