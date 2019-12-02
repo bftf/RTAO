@@ -82,6 +82,7 @@ void RayTraceManager::evaluateAndPrintForPLYVisualization(RayGenerator& rg, cons
   std::vector<Hit> hostHits(numRays);
   cudaCheck(cudaMemcpy(hostHits.data(), cudaHits, sizeof(Hit) * numRays, cudaMemcpyDeviceToHost));
   assert(numRays % rg.spp == 0);
+  printf("Visualizer detected: %i spp\n", rg.spp);
 
   std::ofstream outfile(out_ply_path);
 
@@ -124,7 +125,7 @@ void RayTraceManager::evaluateAndPrintForPLYVisualization(RayGenerator& rg, cons
     }
   }
   outfile.close();
-  printf("done!");
+  printf("done visualization output. \n");
 
   // Print out the first 10 results to validate by eye
   // for (int rayIndex = 0; rayIndex < 10; rayIndex++)

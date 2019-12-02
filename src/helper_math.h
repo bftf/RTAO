@@ -1881,6 +1881,12 @@ struct Ray
     origin_tmin = make_float4(o_x, o_y, o_z, t_min);
     dir_tmax = make_float4(d_x, d_y, d_z, t_max);
   }
+
+  float4 get_origin() { return origin_tmin; }
+  void set_origin(float4 new_origin) { origin_tmin = new_origin; }
+
+  float4 get_direction() { return dir_tmax; }
+  void set_direction(float4 new_dir) { dir_tmax = new_dir; }
 };
 
 struct Hit

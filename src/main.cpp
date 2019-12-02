@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <string>
+#include <assert.h>
 
 int main()
 {
@@ -16,29 +17,62 @@ int main()
   // const std::string model_name = "teapot";
   // const std::string obj_path_addition = "/teapot/teapot.obj";
 
-  const std::string model_name = "sponza";
-  const std::string obj_path_addition = "Sponza/models/sponza.obj";
+  // const std::string model_name = "sponza";
+  // const std::string obj_path_addition = "Sponza/models/sponza.obj";
 
   // const std::string model_name = "dragon";
   // const std::string obj_path_addition = "Dragon/dragon.obj";
 
-  // const std::string model_name = "san-miguel";
-  // const std::string obj_path_addition = "San_Miguel/san-miguel.obj";
+  const std::string model_name = "san-miguel";
+  const std::string obj_path_addition = "San_Miguel/san-miguel.obj";
 
-  const std::string out_ply_path = ply_base_path + model_name + ".ply";
+  const std::string out_ply_path = ply_base_path + model_name;
   const std::string model_path = model_base_path + obj_path_addition;
 
-  RayGenerator rg = RayGenerator(8, 8, 0.1, 10); /*spp, spt, t_min, t_max*/
+  RayGenerator rg = RayGenerator(4, 32, 0.1, 10); /*spp, spt, t_min, t_max*/
 
   /* Load the model */ 
-  rg.loadModelOBJ(model_path);
-  printf("Done loading obj\n");
+  int triangle_count = rg.loadModelOBJ(model_path);
+  assert(triangle_count > 0);
+  printf("Done loading obj. Tri count: %i \n", triangle_count);
 
-  /* Generate rays -> this takes a while
-  rg.generateObjectRays();
-  printf("Done generating rays\n");
-  rg.saveRaysToFile(ray_base_path, model_name);
-  */
+  BVHManager bvh_manager = BVHManager();
+
+  // bvh_manager.buildBVH2(rg);
+  bvh_manager.buildCWBVH(rg);
+
+  /* Generate the points and normals inside the triangles */
+  int sample_count = rg.generatePointsAndNormals_spt();
+  printf("Done generating points and normals - spt first. Sample Count: %i \n", sample_count);
+
+
+  /* Generate rays - uses points and normals -> this takes a while */
+  int spp_count;
+  spp_count = rg.generate_detangled_spp();
+  printf("Done generating rays detangled. SPP count: %i \n", spp_count);
+  
+  rg.raySorting(rg.random_shuffle);
+  rg.saveRaysToFile(ray_base_path, model_name + "_detangled_random");
+
+  exit(0);
+    
+  // rg.clear_rays();
+  // spp_count = rg.generate_entangled_spp(32);
+  // printf("Done generating rays entangled. SPP count: %i \n", spp_count);
+  // rg.saveRaysToFile(ray_base_path, model_name + "_entangled_32");
+
+  
+  rg.readRaysFromFile(ray_base_path + "sponza_randomshuffle_16785088_12_10.ray_file", 100000);
+
+  /* Upload rays */
+  rg.uploadRaysToGPU();
+
+  RayTraceManager rt_manager = RayTraceManager(rg);
+  rt_manager.traceCWBVH(rg);
+
+  printf("Done, traced %i rays \n", rg.getRayCount());
+
+  exit(0);
 
   /* Shuffle and save to file -> this should only be done once
   rg.raySorting(rg.random_shuffle);
@@ -63,7 +97,7 @@ int main()
   // rg.readRaysFromFile(ray_base_path + "sponza_direction_16785088_12_10.ray_file", 16785088);
   // rg.readRaysFromFile(ray_base_path + "sponza_origin_16785088_12_10.ray_file", 16785088);
 
-  rg.readRaysFromFile(ray_base_path + "sponza_randomshuffle_16785088_12_10.ray_file", 200000);
+  // rg.readRaysFromFile(ray_base_path + "teapot_origin_1spp_64spt_origin_404480_18_10.ray_file", 404480);
   // rg.readRaysFromFile(ray_base_path + "sponza_origin_chunk_8192_16785088_13_10.ray_file", 16785088);
   // rg.readRaysFromFile(ray_base_path + "sponza_direction_16785088_12_10.ray_file", 200000);
   // rg.readRaysFromFile(ray_base_path + "sponza_origin_16785088_12_10.ray_file", 200000);
@@ -73,23 +107,19 @@ int main()
   
   // rg.fillWithListOfRays(); // fill custom list of rays for debugging
   
-  // rg.uploadRaysToGPU();
+  rg.uploadRaysToGPU();
 
 
-  BVHManager bvh_manager = BVHManager();
-  RayTraceManager rt_manager = RayTraceManager(rg);
-
-  // bvh_manager.buildBVH2(rg);
-  bvh_manager.buildCWBVH(rg);
 
 
+  /*
   for (int i=0; i < 5000; i++)
   {
     rg.uploadSingleRayToGPU(i);
     rt_manager.traceCWBVHSingleRay(rg);
     printf("Done tracing ray number: %i\n", i);
   }
-
+  */
 
   /* OptiX */
   // rt_manager.traceOptiXPrime(rg);
@@ -98,12 +128,9 @@ int main()
   // rt_manager.traceAila(rg); 
 
   /* CWBVH */
-  // rt_manager.traceCWBVH(rg);
-
+  rt_manager.traceCWBVH(rg);
   
-  
-
-  // rt_manager.evaluateAndPrintForPLYVisualization(rg, out_ply_path); // prints outcome from kernels for visualization (make sure 8, 8 is enabled when reading from file!)
+  rt_manager.evaluateAndPrintForPLYVisualization(rg, out_ply_path); // prints outcome from kernels for visualization (make sure 8, 8 is enabled when reading from file!)
   // rt_manager.debugging(rg); // for debugging - prints output of kernels into command line
   
   printf("Done, traced %i rays \n", rg.getRayCount());

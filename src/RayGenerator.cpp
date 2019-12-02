@@ -58,7 +58,7 @@ RayGenerator::~RayGenerator()
   return;
 }
 
-void RayGenerator::loadModelOBJ(const std::string& model_path)
+int RayGenerator::loadModelOBJ(const std::string& model_path)
 {
 
   objl::Loader loader;
@@ -92,6 +92,9 @@ void RayGenerator::loadModelOBJ(const std::string& model_path)
     float length_cur_normal = sqrt(cur_normal.x*cur_normal.x + cur_normal.y*cur_normal.y + cur_normal.z*cur_normal.z);
     NormalBuffer.push_back(invertNormal * cur_normal/length_cur_normal); // HACK HACK HACK
   }
+
+  assert(VertexBuffer.size() > 0);
+  return(VertexBuffer.size());
 }
 
 // see pixar paper!
@@ -132,8 +135,14 @@ float3 RayGenerator::CosineSampleHemisphere()
   return H;
 }
 
-void RayGenerator::generateSPPRaysFromWorldPosAndDir(float4 world_pos, float4 world_normal, std::vector<Ray>& out_rays)
-{
+void RayGenerator::generateSPPRaysFromWorldPosAndDir(float4 world_pos, float4 world_normal, std::vector<Ray>& out_rays, int my_spp)
+{ 
+  // option to change the spp count
+  if (my_spp == 0)
+  {
+    my_spp = spp;
+  }
+
   float3 n, b1, b2;
 
   const float world_normal_magnitude = sqrt(world_normal.x * world_normal.x + world_normal.y * world_normal.y + world_normal.z * world_normal.z);
@@ -144,7 +153,7 @@ void RayGenerator::generateSPPRaysFromWorldPosAndDir(float4 world_pos, float4 wo
   // get orthonormal basis of the normal
   GetTangentBasis(n, b1, b2);
   
-  for(int i=0; i < spp; i++)
+  for(int i=0; i < my_spp; i++)
   {
     // sample the hemisphere, get a tangent
     float3 tangent = CosineSampleHemisphere();
@@ -269,8 +278,14 @@ void RayGenerator::raySorting(const ray_sorting sorting_strategy)
   }
 }
 
-void RayGenerator::generateObjectRays(int number_of_rays)
+/*
+Generates points and normals. 
+Generate 1 point for each traingle on model, repeat spt times
+*/
+int RayGenerator::generatePointsAndNormals_model(int number_of_rays)
 {
+  int sample_count = 0;
+
   for (int cur_samples_per_triangle = 0; cur_samples_per_triangle < samples_per_triangle; cur_samples_per_triangle++)
   {
     for (auto cur_index : IndexBuffer)
@@ -281,19 +296,101 @@ void RayGenerator::generateObjectRays(int number_of_rays)
         NormalBuffer[cur_index.x], NormalBuffer[cur_index.y], NormalBuffer[cur_index.z],
         cur_point, cur_normal);
 
+      points_vec.push_back(cur_point);
+      normal_vec.push_back(cur_normal);
+
+      sample_count++;
+    }
+    if (number_of_rays > 0 && sample_count > number_of_rays) break;
+  }
+
+  return sample_count;
+}
+
+/*
+Generates points and normals. 
+Generate spt points for each triangle
+*/
+int RayGenerator::generatePointsAndNormals_spt(int number_of_rays)
+{
+  int sample_count = 0;
+
+  for (auto cur_index : IndexBuffer)
+  {
+    for (int cur_samples_per_triangle = 0; cur_samples_per_triangle < samples_per_triangle; cur_samples_per_triangle++)
+    {
+      float3 cur_point, cur_normal;
+      generatePointInsideTriangle(
+        VertexBuffer[cur_index.x], VertexBuffer[cur_index.y], VertexBuffer[cur_index.z],
+        NormalBuffer[cur_index.x], NormalBuffer[cur_index.y], NormalBuffer[cur_index.z],
+        cur_point, cur_normal);
+
+      points_vec.push_back(cur_point);
+      normal_vec.push_back(cur_normal);
+
+      sample_count++;
+    }
+    if (number_of_rays > 0 && sample_count > number_of_rays) break;
+  }
+
+  return sample_count;
+}
+
+int RayGenerator::generate_detangled_spp()
+{ 
+  assert(points_vec.size() == normal_vec.size());
+  assert(points_vec.size() > 0 && normal_vec.size() > 0);
+  assert(ray_helper_vec.size() == 0);
+
+  for (int i=0; i < points_vec.size(); i++)
+  {
+    float3 cur_point = points_vec[i];
+    float3 cur_normal = normal_vec[i];
+
+    std::vector<Ray> temp;
+    generateSPPRaysFromWorldPosAndDir(make_float4(cur_point), make_float4(cur_normal), temp);
+    ray_helper_vec.insert(std::end(ray_helper_vec), std::begin(temp), std::end(temp));
+  }
+  return ray_helper_vec.size();
+}
+
+int RayGenerator::generate_entangled_spp(int entangle_size)
+{ 
+  assert(points_vec.size() == normal_vec.size());
+  assert(points_vec.size() > 0 && normal_vec.size() > 0);
+  assert(ray_helper_vec.size() == 0);
+
+  for (int my_spp=0; my_spp < spp; my_spp++)
+  {
+    for (int j=0; j < points_vec.size(); j+= entangle_size)
+    {
+      float3 cur_point = points_vec[j];
+      float3 cur_normal = normal_vec[j];
+      
       std::vector<Ray> temp;
-      generateSPPRaysFromWorldPosAndDir(make_float4(cur_point), make_float4(cur_normal), temp);
+      generateSPPRaysFromWorldPosAndDir(make_float4(cur_point), make_float4(cur_normal), temp, 1); 
+      assert(temp.size() == 1);
+
+      Ray reference_ray = temp[0];
+      float4 reference_direction = reference_ray.get_direction();
+
+      for (int i=1; i < entangle_size; i++)
+      {
+        cur_point = points_vec[j+i];
+        cur_normal = normal_vec[j+i];
+
+        Ray r;
+        r.make_ray(cur_point.x, cur_point.y, cur_point.z, reference_direction.x, reference_direction.y, reference_direction.z, t_min, t_max);
+        temp.push_back(r);
+      }
+
+      assert(temp.size() == entangle_size);
       ray_helper_vec.insert(std::end(ray_helper_vec), std::begin(temp), std::end(temp));
     }
-
-    if (number_of_rays > 0 && ray_helper_vec.size() > number_of_rays) break;
-  }
-
-  if (number_of_rays > 0)
-  {
-    ray_helper_vec.resize(number_of_rays);
-  }
+  }  
+  return ray_helper_vec.size();
 }
+
 
 void RayGenerator::uploadRaysToGPU()
 {
